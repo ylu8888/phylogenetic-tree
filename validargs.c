@@ -41,7 +41,7 @@ int validargs(int argc, char **argv)
 
         //while the second pointer iterates until reaching null terminator
         while(*char2 != '\0') {
-
+            
             if(*char2 == '-'){
                char2++;
 
