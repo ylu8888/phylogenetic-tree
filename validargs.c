@@ -115,12 +115,7 @@ int validargs(int argc, char **argv)
                     return -1;  // if name is present -n and -o must be too
                 }
             }
-            if(invalid == 1){
-                return -1;
-            }
-            else{
-                return 0;
-            }
+         
 
 
     abort();
