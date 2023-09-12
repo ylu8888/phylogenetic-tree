@@ -37,7 +37,7 @@ int validargs(int argc, char **argv)
 
     for(int i = 0; i < argc; i++){
          char *char1 = *(argv + i);   //iterate through argument array
-         char char2 = *char1; //iterate through arg string
+         char *char2 = char1; //iterate through arg string
 
         //while the second pointer iterates until reaching null terminator
         while(*char2 != '\0') {
