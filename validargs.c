@@ -75,6 +75,12 @@ int validargs(int argc, char **argv)
 
 
             //change the bits in global option before returning 0 or 1
+    
+            //error cases
+            if(flagH == 1){
+                 //if h is present return success and change global option
+                return 0;
+            }
             if(flagM == 1 && flagN == 1){
                 return -1;
             }
