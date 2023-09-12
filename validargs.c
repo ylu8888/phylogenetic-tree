@@ -27,7 +27,6 @@ int validargs(int argc, char **argv)
     int flagN = 0;
     int flagO = 0;
     int name = 0;
-    int invalid = 0;
 
     int counter = 0; //just use counter to check error conditions
     //don't need to check order of arg strings
@@ -37,35 +36,34 @@ int validargs(int argc, char **argv)
     // second iterates through char array3
 
     for(int i = 0; i < argc; i++){
-         char *char1 = argv;   //iterate through argument array
-         char *char2 = *char1; //iterate through arg string
-        int counter = 0;
+         char *char1 = *(argv + i);   //iterate through argument array
+         char char2 = *char1; //iterate through arg string
 
         //while the second pointer iterates until reaching null terminator
         while(*char2 != '\0') {
 
-            if(*char2 == "-"){
+            if(*char2 == '-'){
                char2++;
 
-                if(*char2 == "h" && counter == 1){ //if argument arr = 1 and h is present
+                if(*char2 == 'h' && counter == 1){ //if h is present and argument arr = 1
                     flagH = 1;
                     //set global option 
                     return 0;
                 }
-                else if(*char2 == "m"){
+                else if(*char2 == 'm'){
                     flagM = 1;
                 }
-                else if(*char2 == "n"){
+                else if(*char2 == 'n'){
                     flagN = 1;
                 }
-                else if(*char2 == "o"){
+                else if(*char2 == 'o'){
                     if(flagN == 0){
-                        return -1 //if N is not present but O is, return fail
+                        return -1; //if N is not present but O is, return fail
                     }
                     flagO = 1;
                 }
                 else{
-                    return -1 //else fail b/c there can only be h,m,n,o
+                    return -1; //else fail b/c there can only be h,m,n,o
                 }
 
             }
@@ -93,11 +91,8 @@ int validargs(int argc, char **argv)
     
             //change the bits in global option before returning 0 or 1
     
-            //error cases
-            if(flagH == 1){
-                 //if h is present return success and change global option
-                return 0;
-            }
+            //ERROR CASES
+           
             if(flagM == 1 && flagN == 1){ // m is present if n is also present return failure
                 return -1;
             }
@@ -111,8 +106,13 @@ int validargs(int argc, char **argv)
                 return -1;
             }
             if(flagM == 1){
-                if(flagH == 1 || flagN == 1 || flagO == 1 || name = 1){
+                if(flagH == 1 || flagN == 1 || flagO == 1 || name == 1){
                     return -1; //m must always be alone by itself
+                }
+            }
+            if(name == 1){
+                if(flagO == 0 || flagN == 0){
+                    return -1;  // if name is present -n and -o must be too
                 }
             }
             if(invalid == 1){
