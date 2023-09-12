@@ -39,6 +39,7 @@ int validargs(int argc, char **argv)
     for(int i = 0; i < argc; i++){
          char *char1 = argv;   //iterate through argument array
          char *char2 = *char1; //iterate through arg string
+        int counter = 0;
 
         //while the second pointer iterates until reaching null terminator
         while(*char2 != '\0') {
@@ -46,8 +47,10 @@ int validargs(int argc, char **argv)
             if(*char2 == "-"){
                char2++;
 
-                if(*char2 == "h"){
+                if(*char2 == "h" && counter == 1){ //if argument arr = 1 and h is present
                     flagH = 1;
+                    //set global option 
+                    return 0;
                 }
                 else if(*char2 == "m"){
                     flagM = 1;
@@ -73,6 +76,7 @@ int validargs(int argc, char **argv)
                 }
             }
             char2++;
+            counter++;
         }
 
         char1++;
