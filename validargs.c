@@ -26,6 +26,7 @@ int validargs(int argc, char **argv)
     int flagM = 0;
     int flagN = 0;
     int flagO = 0;
+    int name = 0;
     int invalid = 0;
 
     int counter = 0; //just use counter to check error conditions
@@ -55,9 +56,21 @@ int validargs(int argc, char **argv)
                     flagN = 1;
                 }
                 else if(*char2 == "o"){
+                    if(flagN == 0){
+                        return -1 //if N is not present but O is, return fail
+                    }
                     flagO = 1;
                 }
+                else{
+                    return -1 //else fail b/c there can only be h,m,n,o
+                }
 
+            }
+            else{ //else we get the Name
+                name = 1;
+                if(flagO == 0 || flagN == 0){
+                    return -1; //if we get the name and -o and -n is not present it fails
+                }
             }
             char2++;
         }
@@ -65,15 +78,15 @@ int validargs(int argc, char **argv)
         char1++;
     }
 
-            //if h ignore
+            // if h is present ignore
             // m is present if n is also present return failure
-            //if m is present and o is present failure
+            // if m is present and o is present failure
             // if n is present o must be present
             // o is present then name must be present
             // check the order : o must be after n
             // failure if -x -z -y etc a flag that doesnt exist
-
-
+            //-m must always be by itself
+    
             //change the bits in global option before returning 0 or 1
     
             //error cases
@@ -81,10 +94,23 @@ int validargs(int argc, char **argv)
                  //if h is present return success and change global option
                 return 0;
             }
-            if(flagM == 1 && flagN == 1){
+            if(flagM == 1 && flagN == 1){ // m is present if n is also present return failure
                 return -1;
             }
-
+            if(flagM == 1 && flagO == 1){ // if m is present and o is present failure
+                return -1;
+            }
+            if(flagN == 1 && flagO == 0){ // if n is present o must be present
+                return -1;
+            }
+            if(flagN == 0 && flagO == 1){ //if o is present and n is not
+                return -1;
+            }
+            if(flagM == 1){
+                if(flagH == 1 || flagN == 1 || flagO == 1 || name = 1){
+                    return -1; //m must always be alone by itself
+                }
+            }
             if(invalid == 1){
                 return -1;
             }
