@@ -44,7 +44,7 @@
  *   active_node_map - initialized to the identity mapping on [0..N);
  *     that is, active_node_map[i] == i for 0 <= i < N.
  *
- * @param in  The input stream from which to read the data.
+ * @param in The input stream from which to read the data.
  * @return 0 in case the data was successfully read, otherwise -1
  * if there was any error.  Premature termination of the input data,
  * failure of each line to have the same number of fields, and distance
@@ -53,7 +53,71 @@
  */
 
 int read_distance_data(FILE *in) {
+    
     // TO BE IMPLEMENTED
+    //ignore comments starting with #
+    //terminated by comma or new line
+    //if fields have more char than max_input then error
+    //if taxa name does not match taxa from first line then return error
+    //each line must have the same number of fields
+
+    /*
+    ,a,b,c,d,e
+    a,0,5,9,9,8
+    b,5,0,10,10,9
+    c,9,10,0,8,7
+    d,9,10,8,0,3
+    e,8,9,7,3,0
+    */
+
+    //COUNTING NUMBER OF TAXAS
+    *char t;
+    int taxaCount = 0;   
+
+    while(t != '\n'){
+        t = fgetc(in);
+        if(c == ','){
+            taxaCount++; //count the number of commas, equal to num of taxas
+        }
+    }
+    
+    num_taxa = taxaCount;
+    num_all_nodes = num_taxa;
+    num_active_nodes = num_taxa;
+    
+
+//Normal code checking for errors in each line
+    *char c;
+    c = fgetc(in);
+    int charCount = 0;
+    int fieldCount = 0;
+
+
+while(c != NULL){
+    if(c == '#'){
+        while(c != '\n'){  //iterate through entire line to ignore the comments
+            c = fgetc(in);
+        }
+    }
+    while(c != '\n'){  //this while loop checks fieldCount AND charCount
+        c = fgetc(in);
+        charCount++; 
+        if(c == ','){
+            fieldCount++;
+            if(charCount > INPUT_MAX){
+                return -1; //if char count in each field is larger than input max
+            }
+            charCount = 0; //reset the charCount after each comma to check new field
+        }
+    }
+    if(fieldCount != num_taxa){
+        return -1; //error if fieldCount in each line does not equal num taxa
+    }
+}
+
+        
+        
+   
     abort();
 }
 
