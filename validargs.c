@@ -76,7 +76,7 @@ int validargs(int argc, char **argv)
                     name = 1;
                 }
                 
-                if(name = 1){
+                if(name == 1){
                     if(flagO == 0 || flagN == 0){
                     return -1; //if we get the name and -o and -n is not present it fails
                     }
@@ -120,7 +120,7 @@ int validargs(int argc, char **argv)
                 }
             }
             if(name == 1){
-                if(flagO == 1 || flagN == 1){
+                if(flagO == 0 || flagN == 0){
                     return -1;  // if name is present -n and -o must be too
                 }
             }
