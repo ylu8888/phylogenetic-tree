@@ -87,19 +87,23 @@ int read_distance_data(FILE *in) {
     
 
 //Normal code checking for errors in each line
-    *char c;
-    c = fgetc(in);
+    char c = fgetc(in);
     int charCount = 0;
     int fieldCount = 0;
+    char* ptr = input_buffer; //buffer for reading input field
 
 
-while(c != NULL){
+while(c != '\0'){ //NULL termi means we reached the end of the file input
     if(c == '#'){
         while(c != '\n'){  //iterate through entire line to ignore the comments
+            *ptr = c;
+            ptr++;
             c = fgetc(in);
         }
     }
     while(c != '\n'){  //this while loop checks fieldCount AND charCount
+        *ptr = c;
+        ptr++;
         c = fgetc(in);
         charCount++; 
         if(c == ','){
@@ -113,10 +117,7 @@ while(c != NULL){
     if(fieldCount != num_taxa){
         return -1; //error if fieldCount in each line does not equal num taxa
     }
-}
-
-        
-        
+}   
    
     abort();
 }
