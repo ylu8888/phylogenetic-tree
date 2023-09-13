@@ -28,14 +28,14 @@ int validargs(int argc, char **argv)
     int flagO = 0;
     int name = 0;
 
-    int counter = 0; //just use counter to check error conditions
+    int counter = 1; //just use counter to check error conditions
     //don't need to check order of arg strings
 
     //double for loop
     // one iterates through arg array
     // second iterates through char array3
 
-    for(int i = 0; i < argc; i++){
+    for(int i = 1; i < argc; i++){
          char *char1 = *(argv + i);   //iterate through argument array
          char *char2 = char1; //iterate through arg string
 
