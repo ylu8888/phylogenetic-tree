@@ -47,7 +47,7 @@ int validargs(int argc, char **argv)
 
                 if(*char2 == 'h' && counter == 1){ //if h is present and argument arr = 1
                     flagH = 1;
-                    global_option |= 1;
+                    global_options |= 1;
                     //set global option 
                     return 0;
                 }
@@ -72,9 +72,14 @@ int validargs(int argc, char **argv)
 
             }
             else{ //else we get the Name
-                name = 1;
-                if(flagO == 0 || flagN == 0){
+                if(counter != 0){
+                    name = 1;
+                }
+                
+                if(name = 1){
+                    if(flagO == 0 || flagN == 0){
                     return -1; //if we get the name and -o and -n is not present it fails
+                    }
                 }
             }
             char2++;
@@ -115,19 +120,19 @@ int validargs(int argc, char **argv)
                 }
             }
             if(name == 1){
-                if(flagO == 0 || flagN == 0){
+                if(flagO == 1 || flagN == 1){
                     return -1;  // if name is present -n and -o must be too
                 }
             }
 
     if(flagM == 1){
-        global_option |= (1 << 2);
+        global_options |= (1 << 2);
     }
     if(flagN == 1){
-        global_option |= (1 << 1);
+        global_options |= (1 << 1);
     }
     if(flagO == 1){
-        outlier_name == *(argv + 3);
+        outlier_name = *(argv + 3);
     }
 
     return 0;
