@@ -55,9 +55,9 @@
 int read_distance_data(FILE *in) {
     
     // TO BE IMPLEMENTED
-    //ignore comments starting with #
-    //terminated by comma or new line
-    //if fields have more char than max_input then error
+    //ignore comments starting with # (good)
+    //fields are terminated by comma or new line  
+    //if fields have more char than max_input then error (good)
     //if taxa name does not match taxa from first line then return error
     //each line must have the same number of fields
 
@@ -117,7 +117,10 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
     if(fieldCount != num_taxa){
         return -1; //error if fieldCount in each line does not equal num taxa
     }
+    fieldCount = 0; //reset fieldCount 
 }   
+
+    return 0; //return success
    
     abort();
 }
