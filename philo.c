@@ -54,7 +54,7 @@
 
 int read_distance_data(FILE *in) {
     
-    // TO BE IMPLEMENTED
+   // TO BE IMPLEMENTED
     //ignore comments starting with # (good)
     //fields are terminated by comma or new line  
     //if fields have more char than max_input then error (good)
@@ -69,55 +69,57 @@ int read_distance_data(FILE *in) {
     d,9,10,8,0,3
     e,8,9,7,3,0
     */
-
-    //COUNTING NUMBER OF TAXAS
-    *char t;
-    int taxaCount = 0;   
-
-    while(t != '\n'){
-        t = fgetc(in);
-        if(c == ','){
-            taxaCount++; //count the number of commas, equal to num of taxas
-        }
-    }
-    
-    num_taxa = taxaCount;
-    num_all_nodes = num_taxa;
-    num_active_nodes = num_taxa;
     
 
 //Normal code checking for errors in each line
+    
     char c = fgetc(in);
     int charCount = 0;
     int fieldCount = 0;
+    int taxaCount = 0;
     char* ptr = input_buffer; //buffer for reading input field
+    int lineCount = 0;
+    
+   
 
 
 while(c != '\0'){ //NULL termi means we reached the end of the file input
     if(c == '#'){
         while(c != '\n'){  //iterate through entire line to ignore the comments
-            *ptr = c;
-            ptr++;
             c = fgetc(in);
         }
-    }
-    while(c != '\n'){  //this while loop checks fieldCount AND charCount
-        *ptr = c;
-        ptr++;
         c = fgetc(in);
+    }
+    
+    while(c != '\n'){  //this while loop checks fieldCount AND charCount
+        
         charCount++; 
         if(c == ','){
             fieldCount++;
+            taxaCount++;
             if(charCount > INPUT_MAX){
                 return -1; //if char count in each field is larger than input max
             }
             charCount = 0; //reset the charCount after each comma to check new field
         }
+        c = fgetc(in);
+        
+    }
+    if(lineCount == 0){    //COUNTING NUMBER OF TAXAS
+        num_taxa = taxaCount;
+         //num_all_nodes = num_taxa;
+         //num_active_nodes = num_taxa;
     }
     if(fieldCount != num_taxa){
         return -1; //error if fieldCount in each line does not equal num taxa
     }
-    fieldCount = 0; //reset fieldCount 
+    fieldCount = 0; //reset fieldCount after each line
+    lineCount++; //increment linecount after each line
+    c = fgetc(in);
+    
+    if(lineCount == num_taxa){
+        break;
+    }
 }   
 
     return 0; //return success
