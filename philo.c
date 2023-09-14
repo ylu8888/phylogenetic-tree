@@ -77,7 +77,7 @@ int read_distance_data(FILE *in) {
     int fieldCount = 0;
     int taxaCount = 0;
     char* ptr = input_buffer; //buffer for reading input field
-    char *ptr2 = *node_names;
+    char* ptr2 = *node_names;
     int lineCount = 0;
     int bufferCount = 0;
     
@@ -116,16 +116,19 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
                 while(*clear != '\0'){
                 //now store input buffer into nodenames and clear input_buffer
                 
-                bufferCount++;
+                bufferCount++; //count how many chars in input buffer
                 *ptr2 = *clear;
                 ptr2++;
-               *clear= '\0';
+                *clear= '\0'; //clear everything in buffer by setting to null term
                 clear++;
                  }
    
                  //THIS HELPS ITERATE TO THE NEXT ROW
-                 ptr2 += (INPUT_MAX + 1 - bufferCount); //essentially add the rest of the row minus input buffer to the nodenames PTR
+                 if(taxaCount != 1){ //need this condition so it doesnt add to ptr for the first comma in taxs!
+                      ptr2 += (INPUT_MAX + 1 - bufferCount); //essentially add the rest of the row minus input buffer to the nodenames PTR
                  bufferCount = 0;
+                 }
+                
             }
            
             
@@ -135,7 +138,8 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
         c = fgetc(in);
         
     }
-    if(lineCount == 0){    //COUNTING NUMBER OF TAXAS
+    
+    if(lineCount == 0){    //COUNTING NUMBER OF TAXAS              
         num_taxa = taxaCount;
         num_all_nodes = num_taxa;
         num_active_nodes = num_taxa;
@@ -166,7 +170,6 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
    
     abort();
 }
-
 
 /**
  * @brief  Emit a representation of the phylogenetic tree in Newick
