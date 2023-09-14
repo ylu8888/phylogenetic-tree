@@ -54,7 +54,7 @@
 
 int read_distance_data(FILE *in) {
    
-     // TO BE IMPLEMENTED
+    // TO BE IMPLEMENTED
     //ignore comments starting with # (good)
     //fields are terminated by comma or new line  
     //if fields have more char than max_input then error (good)
@@ -82,6 +82,7 @@ int read_distance_data(FILE *in) {
     int lineCount = 0;
     int bufferCount = 0;
     char* nodeCheck = *node_names;
+    int zeroCount = 0;
     
 
 while(c != '\0'){ //NULL termi means we reached the end of the file input
@@ -105,6 +106,12 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
                  if(c != '0'){
                      return -1; //testing the 0 diagonals 
                  }
+                 else{
+                     zeroCount++;
+                     if(zeroCount > 1){
+                         return -1; //this means that theres more than 1 zero ex: "000"
+                     }
+                 }
              }
         }
         
@@ -116,6 +123,7 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
             taxaCount++;
             charCount = 0; //reset the charCount after each comma to check new field
             *ptr = '\0'; // null terminate the input buffer field b/c to turn them into strings
+            zeroCount = 0; //reset the zero count for the diagonals
            
             if(lineCount == 0){ // we only want taxa in the input buffer AND nodenames
                 char *clear = input_buffer;
