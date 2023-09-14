@@ -54,6 +54,7 @@
 
 int read_distance_data(FILE *in) {
    
+   
     // TO BE IMPLEMENTED
     //ignore comments starting with # (good)
     //fields are terminated by comma or new line  
@@ -102,12 +103,12 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
         if(c != ','){
             *ptr = c;
              ptr++;
-             if(taxaCount % (num_taxa + 1) == 0 && lineCount >= 1){ //line must be after first row 
-                 if(c != '0'){ //testing the 0 diagonals 
-                     return -1; 
+             if(taxaCount % (num_taxa + 1) == 0 && lineCount >= 1){
+                 if(c != '0'){
+                     return -1; //testing the 0 diagonals 
                  }
                  else{
-                     zeroCount++; //testing num of zeroes in the field
+                     zeroCount++;
                      if(zeroCount > 1){
                          return -1; //this means that theres more than 1 zero ex: "000"
                      }
@@ -191,7 +192,7 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
      c = fgetc(in);
      
     if(taxaCount % num_taxa == 0){ //each new line the taxacount(comma count) is equal to num_taxa
-       while(c != ','){
+       while(c != ',' && c != '#'){
            if(*nodeCheck != c){
                return -1; //this means the taxas did not meach
            }
@@ -218,6 +219,7 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
     
 }   
    
+    
     /* // FOR if
     c = fgetc(in);
     while(c != '\n'){
