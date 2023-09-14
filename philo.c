@@ -53,7 +53,8 @@
  */
 
 int read_distance_data(FILE *in) {
-   // TO BE IMPLEMENTED
+   
+    // TO BE IMPLEMENTED
     //ignore comments starting with # (good)
     //fields are terminated by comma or new line  
     //if fields have more char than max_input then error (good)
@@ -116,17 +117,17 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
                 while(*clear != '\0'){
                 //now store input buffer into nodenames and clear input_buffer
                 
-                bufferCount++; //count how many chars in input buffer
+                bufferCount++;
                 *ptr2 = *clear;
                 ptr2++;
-                *clear= '\0'; //clear everything in buffer by setting to null term
+               *clear= '\0';
                 clear++;
                  }
    
                  //THIS HELPS ITERATE TO THE NEXT ROW
                  if(taxaCount != 1){ //need this condition so it doesnt add to ptr for the first comma in taxs!
                       ptr2 += (INPUT_MAX + 1 - bufferCount); //essentially add the rest of the row minus input buffer to the nodenames PTR
-                 bufferCount = 0;
+                    bufferCount = 0;
                  }
                 
             }
@@ -139,10 +140,30 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
         
     }
     
-    if(lineCount == 0){    //COUNTING NUMBER OF TAXAS              
+    
+    if(lineCount == 0){    //COUNTING NUMBER OF TAXAS
         num_taxa = taxaCount;
         num_all_nodes = num_taxa;
         num_active_nodes = num_taxa;
+        
+        //NEED TO GET THE LAST TAXA IN B/C IT BREAKS OUT OF WHILE LOOP AT '\n'
+        char *clear = input_buffer;
+                
+            while(*clear != '\0'){
+            //now store input buffer into nodenames and clear input_buffer
+                
+            bufferCount++;
+            *ptr2 = *clear;
+            ptr2++;
+            *clear= '\0';
+            clear++;
+             }
+   
+            //THIS HELPS ITERATE TO THE NEXT ROW
+            if(taxaCount != 1){ //need this condition so it doesnt add to ptr for the first comma in taxs!
+            ptr2 += (INPUT_MAX + 1 - bufferCount); //essentially add the rest of the row minus input buffer to the nodenames PTR
+            bufferCount = 0;
+            }
     }
     if(fieldCount != num_taxa){
         return -1; //error if fieldCount in each line does not equal num taxa
@@ -158,7 +179,7 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
     
     
 }   
-    
+
     /* // FOR if
     c = fgetc(in);
     while(c != '\n'){
@@ -170,7 +191,6 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
    
     abort();
 }
-
 /**
  * @brief  Emit a representation of the phylogenetic tree in Newick
  * format to a specified output stream.
