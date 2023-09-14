@@ -125,8 +125,8 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
     }
     if(lineCount == 0){    //COUNTING NUMBER OF TAXAS
         num_taxa = taxaCount;
-         //num_all_nodes = num_taxa;
-         //num_active_nodes = num_taxa;
+        num_all_nodes = num_taxa;
+        num_active_nodes = num_taxa;
     }
     if(fieldCount != num_taxa){
         return -1; //error if fieldCount in each line does not equal num taxa
@@ -154,6 +154,8 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
    
     abort();
 }
+
+
 /**
  * @brief  Emit a representation of the phylogenetic tree in Newick
  * format to a specified output stream.
