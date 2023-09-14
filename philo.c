@@ -102,12 +102,12 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
         if(c != ','){
             *ptr = c;
              ptr++;
-             if(taxaCount % (num_taxa + 1) == 0 && lineCount >= 1){
-                 if(c != '0'){
-                     return -1; //testing the 0 diagonals 
+             if(taxaCount % (num_taxa + 1) == 0 && lineCount >= 1){ //line must be after first row 
+                 if(c != '0'){ //testing the 0 diagonals 
+                     return -1; 
                  }
                  else{
-                     zeroCount++;
+                     zeroCount++; //testing num of zeroes in the field
                      if(zeroCount > 1){
                          return -1; //this means that theres more than 1 zero ex: "000"
                      }
@@ -218,14 +218,6 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
     
 }   
    
-   printf("%d\n", num_taxa);
-    printf("%c\n", node_names[0][0]);
-    printf("%c\n", node_names[1][0]);
-    printf("%c\n", node_names[2][0]);
-    printf("%c\n", node_names[3][0]);
-    printf("%c\n", node_names[4][0]);
- 
-    
     /* // FOR if
     c = fgetc(in);
     while(c != '\n'){
