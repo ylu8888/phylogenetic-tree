@@ -53,8 +53,6 @@
  */
 
 int read_distance_data(FILE *in) {
-   
-   
     // TO BE IMPLEMENTED
     //ignore comments starting with # (good)
     //fields are terminated by comma or new line  
@@ -147,12 +145,17 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
                 
             }
            
-            
-            ptr = input_buffer;
+        ptr = input_buffer;
            
+           //checking if fields are nonempty: b,5,0,1,
+           c = fgetc(in);
+           if(c == '\n' || c == '\0' || c == ','){
+               return -1; //this means the field is EMPTY
+           }
+           ungetc(c, in);
         }
-        c = fgetc(in);
         
+        c = fgetc(in);
     }
     
     
@@ -219,7 +222,6 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
     
 }   
    
-    
     /* // FOR if
     c = fgetc(in);
     while(c != '\n'){
