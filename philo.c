@@ -81,6 +81,7 @@ int read_distance_data(FILE *in) {
     char* ptr2 = *node_names;
     int lineCount = 0;
     int bufferCount = 0;
+    char* nodeCheck = *node_names;
     
 
 while(c != '\0'){ //NULL termi means we reached the end of the file input
@@ -123,10 +124,10 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
                *clear= '\0';
                 clear++;
                  }
-   
+                *ptr2 = '\0';
                  //THIS HELPS ITERATE TO THE NEXT ROW
                  if(taxaCount != 1){ //need this condition so it doesnt add to ptr for the first comma in taxs!
-                      ptr2 += (INPUT_MAX + 1 - bufferCount); //essentially add the rest of the row minus input buffer to the nodenames PTR
+                      ptr2 += (INPUT_MAX - bufferCount); //essentially add the rest of the row minus input buffer to the nodenames PTR
                     bufferCount = 0;
                  }
                 
@@ -158,28 +159,52 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
             *clear= '\0';
             clear++;
              }
-   
+            *ptr2 = '\0';
             //THIS HELPS ITERATE TO THE NEXT ROW
             if(taxaCount != 1){ //need this condition so it doesnt add to ptr for the first comma in taxs!
-            ptr2 += (INPUT_MAX + 1 - bufferCount); //essentially add the rest of the row minus input buffer to the nodenames PTR
+            ptr2 += (INPUT_MAX - bufferCount); //essentially add the rest of the row minus input buffer to the nodenames PTR
             bufferCount = 0;
             }
     }
-    if(fieldCount != num_taxa){
-        return -1; //error if fieldCount in each line does not equal num taxa
-    }
-    fieldCount = 0; //reset fieldCount after each line
-    
     if(lineCount == num_taxa){
         break; //break out of infinite while loop after reaching linecount == taxacount
     }
     
+    if(fieldCount != num_taxa){
+        return -1; //error if fieldCount in each line does not equal num taxa
+    }
+    
+    //SECTION FOR CHECKING IF TAXA IN FIRST LINE EQUALS EACH ROW TAXA
+     c = fgetc(in);
+     
+    if(taxaCount % num_taxa == 0){ //each new line the taxacount(comma count) is equal to num_taxa
+       while(c != ','){
+           if(*nodeCheck != c){
+               return -1; //this means the taxas did not meach
+           }
+           c = fgetc(in);
+           
+           nodeCheck++;
+           bufferCount++;
+       }
+       
+       if(c == ',' && *nodeCheck != '\0'){
+           return -1; // this means nodeNames taxas is longer than the row taxa
+       }
+       
+       nodeCheck += (INPUT_MAX - bufferCount); //check next row for taxa of NodeNames
+       bufferCount = 0;
+       
+    }
+  
+
+    fieldCount = 0; //reset fieldCount after each line
+    
     lineCount++; //increment linecount after each line
-    c = fgetc(in);
     
     
 }   
-
+   
     /* // FOR if
     c = fgetc(in);
     while(c != '\n'){
