@@ -69,14 +69,15 @@ int read_distance_data(FILE *in) {
     e,8,9,7,3,0
     */
     
-
-//Normal code checking for errors in each line
+//WE want to read characters from each line and store it in the input buffer UNTIL WE hit a comma, 
+//then want to store whatever is in that input buffer into nodeNames THEN clear the input original buffer
     
     char c = fgetc(in);
     int charCount = 0;
     int fieldCount = 0;
     int taxaCount = 0;
     char* ptr = input_buffer; //buffer for reading input field
+    char* ptr2 = node_names;
     int lineCount = 0;
     
 
@@ -93,11 +94,31 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
                 return -1; //if char count in each field is larger than input max
         }
         charCount++; 
+        
+        if(c != ','){
+            *ptr = c;
+            ptr++;
+        }
+        
+
         if(c == ','){
             fieldCount++;
             taxaCount++;
-            
             charCount = 0; //reset the charCount after each comma to check new field
+            *ptr = '\0'; // null terminate the input buffer field b/c to turn them into strings
+           
+            
+            char *clearptr = input_buffer;
+            while(*clearptr != '\0'){
+                //now store input buffer into nodenames and clear input_buffer
+                ptr2 = clearptr;
+                 ptr2++;
+                *clearptr = '\0';
+                clearptr++;
+            }
+            
+            ptr = input_buffer;
+           
         }
         c = fgetc(in);
         
@@ -111,20 +132,28 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
         return -1; //error if fieldCount in each line does not equal num taxa
     }
     fieldCount = 0; //reset fieldCount after each line
-    if(lineCount >= num_taxa){
+    
+    if(lineCount == num_taxa){
         break; //break out of infinite while loop after reaching linecount == taxacount
     }
+    
     lineCount++; //increment linecount after each line
     c = fgetc(in);
     
     
 }   
+    
+    /* // FOR if
+    c = fgetc(in);
+    while(c != '\n'){
+        return -1; //means theres extra lines
+    }
+    */
 
     return 0; //return success
    
     abort();
 }
-
 /**
  * @brief  Emit a representation of the phylogenetic tree in Newick
  * format to a specified output stream.
