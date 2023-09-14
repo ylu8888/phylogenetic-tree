@@ -53,7 +53,7 @@
  */
 
 int read_distance_data(FILE *in) {
-  // TO BE IMPLEMENTED
+   // TO BE IMPLEMENTED
     //ignore comments starting with # (good)
     //fields are terminated by comma or new line  
     //if fields have more char than max_input then error (good)
@@ -77,8 +77,9 @@ int read_distance_data(FILE *in) {
     int fieldCount = 0;
     int taxaCount = 0;
     char* ptr = input_buffer; //buffer for reading input field
-    char* ptr2 = node_names;
+    char *ptr2 = *node_names;
     int lineCount = 0;
+    int bufferCount = 0;
     
 
 while(c != '\0'){ //NULL termi means we reached the end of the file input
@@ -97,8 +98,10 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
         
         if(c != ','){
             *ptr = c;
-            ptr++;
+             ptr++;
         }
+        
+        //Store only the taxa into nodeNames and use for loops with MAXINPUT conditions to reach new row
         
 
         if(c == ','){
@@ -107,15 +110,24 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
             charCount = 0; //reset the charCount after each comma to check new field
             *ptr = '\0'; // null terminate the input buffer field b/c to turn them into strings
            
-            
-            char *clearptr = input_buffer;
-            while(*clearptr != '\0'){
+            if(lineCount == 0){ // we only want taxa in the input buffer AND nodenames
+                char *clear = input_buffer;
+                
+                while(*clear != '\0'){
                 //now store input buffer into nodenames and clear input_buffer
-                ptr2 = clearptr;
-                 ptr2++;
-                *clearptr = '\0';
-                clearptr++;
+                
+                bufferCount++;
+                *ptr2 = *clear;
+                ptr2++;
+               *clear= '\0';
+                clear++;
+                 }
+   
+                 //THIS HELPS ITERATE TO THE NEXT ROW
+                 ptr2 += (INPUT_MAX + 1 - bufferCount); //essentially add the rest of the row minus input buffer to the nodenames PTR
+                 bufferCount = 0;
             }
+           
             
             ptr = input_buffer;
            
