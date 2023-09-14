@@ -54,7 +54,7 @@
 
 int read_distance_data(FILE *in) {
    
-    // TO BE IMPLEMENTED
+     // TO BE IMPLEMENTED
     //ignore comments starting with # (good)
     //fields are terminated by comma or new line  
     //if fields have more char than max_input then error (good)
@@ -101,6 +101,11 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
         if(c != ','){
             *ptr = c;
              ptr++;
+             if(taxaCount % (num_taxa + 1) == 0 && lineCount >= 1){
+                 if(c != '0'){
+                     return -1; //testing the 0 diagonals 
+                 }
+             }
         }
         
         //Store only the taxa into nodeNames and use for loops with MAXINPUT conditions to reach new row
@@ -205,6 +210,14 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
     
 }   
    
+   printf("%d\n", num_taxa);
+    printf("%c\n", node_names[0][0]);
+    printf("%c\n", node_names[1][0]);
+    printf("%c\n", node_names[2][0]);
+    printf("%c\n", node_names[3][0]);
+    printf("%c\n", node_names[4][0]);
+ 
+    
     /* // FOR if
     c = fgetc(in);
     while(c != '\n'){
@@ -216,6 +229,7 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
    
     abort();
 }
+
 /**
  * @brief  Emit a representation of the phylogenetic tree in Newick
  * format to a specified output stream.
