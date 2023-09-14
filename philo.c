@@ -53,8 +53,7 @@
  */
 
 int read_distance_data(FILE *in) {
-    
-   // TO BE IMPLEMENTED
+  // TO BE IMPLEMENTED
     //ignore comments starting with # (good)
     //fields are terminated by comma or new line  
     //if fields have more char than max_input then error (good)
@@ -80,8 +79,6 @@ int read_distance_data(FILE *in) {
     char* ptr = input_buffer; //buffer for reading input field
     int lineCount = 0;
     
-   
-
 
 while(c != '\0'){ //NULL termi means we reached the end of the file input
     if(c == '#'){
@@ -92,14 +89,14 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
     }
     
     while(c != '\n'){  //this while loop checks fieldCount AND charCount
-        
+        if(charCount > INPUT_MAX){
+                return -1; //if char count in each field is larger than input max
+        }
         charCount++; 
         if(c == ','){
             fieldCount++;
             taxaCount++;
-            if(charCount > INPUT_MAX){
-                return -1; //if char count in each field is larger than input max
-            }
+            
             charCount = 0; //reset the charCount after each comma to check new field
         }
         c = fgetc(in);
@@ -114,12 +111,13 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
         return -1; //error if fieldCount in each line does not equal num taxa
     }
     fieldCount = 0; //reset fieldCount after each line
+    if(lineCount >= num_taxa){
+        break; //break out of infinite while loop after reaching linecount == taxacount
+    }
     lineCount++; //increment linecount after each line
     c = fgetc(in);
     
-    if(lineCount == num_taxa){
-        break;
-    }
+    
 }   
 
     return 0; //return success
