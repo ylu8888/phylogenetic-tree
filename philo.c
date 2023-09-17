@@ -73,7 +73,7 @@ int read_distance_data(FILE *in) {
 //then want to store whatever is in that input buffer into nodeNames THEN clear the input original buffer
     
     char c = fgetc(in);
-    int charCount = 0;
+    int charCount = 1;
     int fieldCount = 0;
     int taxaCount = 0;
     char* ptr = input_buffer; //buffer for reading input field
@@ -82,6 +82,10 @@ int read_distance_data(FILE *in) {
     int bufferCount = 0;
     char* nodeCheck = *node_names;
     int zeroCount = 0;
+    //for putting doubles into distance array
+    char* distNum = input_buffer;
+    double* matrixCheck = *distances;
+    
     
 
 while(c != '\0'){ //NULL termi means we reached the end of the file input
@@ -99,8 +103,15 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
         charCount++; 
         
         if(c != ','){
-            *ptr = c;
-             ptr++;
+            if(lineCount == 0){
+                *ptr = c;
+                 ptr++;
+            }
+            if(lineCount > 0){
+                *distNum = c;
+                 distNum++;
+            }
+             
              if(taxaCount % (num_taxa + 1) == 0 && lineCount >= 1){
                  if(c != '0'){
                      return -1; //testing the 0 diagonals 
@@ -121,8 +132,13 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
             fieldCount++;
             taxaCount++;
             charCount = 0; //reset the charCount after each comma to check new field
-            *ptr = '\0'; // null terminate the input buffer field b/c to turn them into strings
             zeroCount = 0; //reset the zero count for the diagonals
+            if(lineCount == 0){
+                *ptr = '\0'; // null terminate the input buffer field b/c to turn them into strings
+            }
+            if(lineCount > 0){
+              *distNum = '\0';
+            }
            
             if(lineCount == 0){ // we only want taxa in the input buffer AND nodenames
                 char *clear = input_buffer;
@@ -142,14 +158,33 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
                       ptr2 += (INPUT_MAX - bufferCount); //essentially add the rest of the row minus input buffer to the nodenames PTR
                     bufferCount = 0;
                  }
+                 ptr = input_buffer;
                 
             }
            
-        ptr = input_buffer;
+             //THIS ONE IS FOR THE DISTANCE DATA
+            if(lineCount > 0 && (taxaCount % (num_taxa + 1) != 0)){ 
+                char *clear = input_buffer;
+                
+                while(*clear != '\0'){
+                //now store input buffer into nodenames and clear input_buffer
+                
+                *matrixCheck = *clear;
+                matrixCheck++;
+               *clear= '\0';
+                clear++;
+                 }
+                 
+                 *matrixCheck = '\0';
+                 
+            }
+            
+        
+        distNum = input_buffer;
            
            //checking if fields are nonempty: b,5,0,1,
            c = fgetc(in);
-           if(c == '\n' || c == '\0' || c == ','){
+           if(c == '\n' || c == '\0' || c == ',' || c == '.'){
                return -1; //this means the field is EMPTY
            }
            ungetc(c, in);
@@ -157,7 +192,7 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
         
         c = fgetc(in);
     }
-    
+  
     
     if(lineCount == 0){    //COUNTING NUMBER OF TAXAS
         num_taxa = taxaCount;
@@ -183,6 +218,30 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
             bufferCount = 0;
             }
     }
+    
+    if(lineCount > 0 && (taxaCount % (num_taxa + 1) != 0)){ //NEED TO GET THE LAST DISTANCE DATA IN B/C IT BREAKS OUT OF WHILE LOOP AT '\n'
+                char *clear = input_buffer;
+                
+                while(*clear != '\0'){
+                //now store input buffer into nodenames and clear input_buffer
+
+               
+                *matrixCheck = *clear;
+                matrixCheck++;
+               *clear= '\0';
+                clear++;
+                 }
+                 
+                 *matrixCheck = '\0';
+                 //we need to increment distance data by adding rest of rows minus input buffer
+                 if(taxaCount != 1){ //need this condition so it doesnt add to ptr for the first comma in taxs!
+                      matrixCheck += (MAX_NODES - num_taxa); //essentially add the rest of the row minus input buffer to the nodenames PTR
+                      
+                 }
+                  
+   
+    }
+            
     if(lineCount == num_taxa){
         break; //break out of infinite while loop after reaching linecount == taxacount
     }
@@ -216,12 +275,11 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
   
 
     fieldCount = 0; //reset fieldCount after each line
-    
     lineCount++; //increment linecount after each line
     
     
 }   
-   
+    
     /* // FOR if
     c = fgetc(in);
     while(c != '\n'){
@@ -233,7 +291,6 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
    
     abort();
 }
-
 /**
  * @brief  Emit a representation of the phylogenetic tree in Newick
  * format to a specified output stream.
