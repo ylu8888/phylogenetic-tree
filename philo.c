@@ -53,7 +53,7 @@
  */
 
 int read_distance_data(FILE *in) {
-    // TO BE IMPLEMENTED
+     // TO BE IMPLEMENTED
     //ignore comments starting with # (good)
     //fields are terminated by comma or new line  
     //if fields have more char than max_input then error (good)
@@ -85,7 +85,9 @@ int read_distance_data(FILE *in) {
     //for putting doubles into distance array
     char* distNum = input_buffer;
     double* matrixCheck = *distances;
-    
+    int numCount = 0;
+    int decCount = 0;
+    double dubNum = 0;
     
 
 while(c != '\0'){ //NULL termi means we reached the end of the file input
@@ -95,6 +97,7 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
         }
         c = fgetc(in);
     }
+    
     
     while(c != '\n'){  //this while loop checks fieldCount AND charCount
         if(charCount > INPUT_MAX){
@@ -107,9 +110,24 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
                 *ptr = c;
                  ptr++;
             }
+            
             if(lineCount > 0){
                 *distNum = c;
+                
+                
+                if(*distNum < '0' || *distNum > '9'){
+                     return -1; //this means its not a valid double in matrix
+                 }
+                 
+                 if(decCount == 0){
+                     numCount++; //count the digits BEFORE decimal 
+                 }
+                 if(*distNum == '.'){
+                     decCount++;  //count the digits AFTER decimal
+                 }
+                 
                  distNum++;
+               
             }
              
              if(taxaCount % (num_taxa + 1) == 0 && lineCount >= 1){
@@ -126,7 +144,6 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
         }
         
         //Store only the taxa into nodeNames and use for loops with MAXINPUT conditions to reach new row
-        
 
         if(c == ','){
             fieldCount++;
@@ -155,32 +172,44 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
                 *ptr2 = '\0';
                  //THIS HELPS ITERATE TO THE NEXT ROW
                  if(taxaCount != 1){ //need this condition so it doesnt add to ptr for the first comma in taxs!
-                      ptr2 += (INPUT_MAX - bufferCount); //essentially add the rest of the row minus input buffer to the nodenames PTR
+                      ptr2 += (INPUT_MAX + 1- bufferCount) ; //essentially add the rest of the row minus input buffer to the nodenames PTR
                     bufferCount = 0;
                  }
                  ptr = input_buffer;
                 
             }
-           
+            
+            // 53.25
              //THIS ONE IS FOR THE DISTANCE DATA
-            if(lineCount > 0 && (taxaCount % (num_taxa + 1) != 0)){ 
+            if(lineCount > 0){ 
                 char *clear = input_buffer;
                 
-                while(*clear != '\0'){
-                //now store input buffer into nodenames and clear input_buffer
+                while(numCount != 0){
+                *clear -= '0'; //convert to a double using ascii
+                dubNum += *clear * (pow(10, numCount - 1)); //multiply by 10 raised to numCount digits power
+                numCount--;  //decrement numCount after each multiplication
+                }
                 
-                *matrixCheck = *clear;
+                decCount *= -1;  //need decimal digits coutner to be negative for power raise
+                
+                while(decCount != 0){
+                *clear -= '0'; //convert to a double using ascii
+                dubNum += *clear * pow(10, decCount); //multiply by 10 raised to decCount digits power
+                decCount++;
+                }
+               
+                *matrixCheck = dubNum;
                 matrixCheck++;
-               *clear= '\0';
-                clear++;
-                 }
-                 
-                 *matrixCheck = '\0';
+              
+                 //*matrixCheck = '\0'; dont need to null terminate anymore
                  
             }
             
         
         distNum = input_buffer;
+        numCount = 0; //reset the counter for decimal distance digits
+        dubNum = 0;
+        decCount = 0;
            
            //checking if fields are nonempty: b,5,0,1,
            c = fgetc(in);
@@ -192,7 +221,7 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
         
         c = fgetc(in);
     }
-  
+   
     
     if(lineCount == 0){    //COUNTING NUMBER OF TAXAS
         num_taxa = taxaCount;
@@ -214,33 +243,42 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
             *ptr2 = '\0';
             //THIS HELPS ITERATE TO THE NEXT ROW
             if(taxaCount != 1){ //need this condition so it doesnt add to ptr for the first comma in taxs!
-            ptr2 += (INPUT_MAX - bufferCount); //essentially add the rest of the row minus input buffer to the nodenames PTR
+            ptr2 += (INPUT_MAX + 1 - bufferCount); //essentially add the rest of the row minus input buffer to the nodenames PTR
             bufferCount = 0;
             }
     }
     
-    if(lineCount > 0 && (taxaCount % (num_taxa + 1) != 0)){ //NEED TO GET THE LAST DISTANCE DATA IN B/C IT BREAKS OUT OF WHILE LOOP AT '\n'
+    if(lineCount > 0){ //NEED TO GET THE LAST DISTANCE DATA IN B/C IT BREAKS OUT OF WHILE LOOP AT '\n'
                 char *clear = input_buffer;
                 
-                while(*clear != '\0'){
-                //now store input buffer into nodenames and clear input_buffer
-
+                while(numCount != 0){
+                *clear -= '0'; //convert to a double using ascii
+                dubNum += *clear * (pow(10, numCount - 1)); //multiply by 10 raised to numCount digits power
+                numCount--;  //decrement numCount after each multiplication
+                }
+                
+                decCount *= -1;  //need decimal digits coutner to be negative for power raise
+                
+                while(decCount != 0){
+                *clear -= '0'; //convert to a double using ascii
+                dubNum += *clear * (pow(10, decCount)); //multiply by 10 raised to decCount digits power
+                decCount++;
+                }
                
-                *matrixCheck = *clear;
+                *matrixCheck = dubNum;
                 matrixCheck++;
-               *clear= '\0';
-                clear++;
-                 }
-                 
-                 *matrixCheck = '\0';
-                 //we need to increment distance data by adding rest of rows minus input buffer
-                 if(taxaCount != 1){ //need this condition so it doesnt add to ptr for the first comma in taxs!
+                
+                if(taxaCount != 1){ //need this condition so it doesnt add to ptr for the first comma in taxs!
                       matrixCheck += (MAX_NODES - num_taxa); //essentially add the rest of the row minus input buffer to the nodenames PTR
                       
                  }
-                  
    
     }
+    
+    distNum = input_buffer;
+    dubNum = 0;
+    numCount = 0; 
+    decCount = 0;
             
     if(lineCount == num_taxa){
         break; //break out of infinite while loop after reaching linecount == taxacount
@@ -268,7 +306,7 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
            return -1; // this means nodeNames taxas is longer than the row taxa
        }
        
-       nodeCheck += (INPUT_MAX - bufferCount); //check next row for taxa of NodeNames
+       nodeCheck += (INPUT_MAX + 1 - bufferCount); //check next row for taxa of NodeNames
        bufferCount = 0;
        
     }
