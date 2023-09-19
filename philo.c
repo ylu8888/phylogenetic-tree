@@ -98,15 +98,7 @@ int main()
 
 
 int read_distance_data(FILE *in) {
-    //these are global variables, using just for testing
-    char input_buffer[INPUT_MAX+1];
-    int num_taxa = 0;
-    char node_names[MAX_NODES][INPUT_MAX + 1];
-    int num_all_nodes = 0;
-    int num_active_nodes = 0;
-    double distances[MAX_NODES][MAX_NODES];
-    
-    
+   
     // TO BE IMPLEMENTED
     //ignore comments starting with # (good)
     //fields are terminated by comma or new line  
@@ -251,8 +243,7 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
                  ptr = input_buffer;
                 
             }
-            //53
-            // 53.25
+            
              //THIS ONE IS FOR THE DISTANCE DATA
             if(lineCount > 0 && fieldCount > 1){ 
                 char *clear = input_buffer;
@@ -371,13 +362,13 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
     decCount = 0;
     decimalBool = 0;
     decCount2 = 0;
+    
+     if(fieldCount != num_taxa){
+        return -1; //error if fieldCount in each line does not equal num taxa
+    }
             
     if(lineCount == num_taxa){
         break; //break out of infinite while loop after reaching linecount == taxacount
-    }
-    
-    if(fieldCount != num_taxa){
-        return -1; //error if fieldCount in each line does not equal num taxa
     }
     
     //SECTION FOR CHECKING IF TAXA IN FIRST LINE EQUALS EACH ROW TAXA
@@ -403,13 +394,11 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
        
     }
   
-
     fieldCount = 0; //reset fieldCount after each line
     lineCount++; //increment linecount after each line
     
-    
 }   
-    
+   
     /* // FOR if
     c = fgetc(in);
     while(c != '\n'){
@@ -419,28 +408,6 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
 
     return 0; //return success
    
-    abort();
-}
-
-/**
- * @brief  Emit the synthesized distance matrix as CSV.
- * @details  This function emits to a specified output stream a representation
- * of the synthesized distance matrix resulting from the neighbor joining
- * algorithm.  The output is in the same CSV form as the program input.
- * The number of rows and columns of the matrix is equal to the value
- * of num_all_nodes at the end of execution of the algorithm.
- * The submatrix that consists of the first num_leaves rows and columns
- * is identical to the matrix given as input.  The remaining rows and columns
- * contain estimated distances to internal nodes that were synthesized during
- * the execution of the algorithm.
- *
- * @param out  Stream to which to output a CSV representation of the
- * synthesized distance matrix.
- * @return 0 in case the output is successfully emitted, otherwise -1
- * if any error occurred.
- */
-int emit_distance_matrix(FILE *out) {
-    // TO BE IMPLEMENTED
     abort();
 }
 
