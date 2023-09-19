@@ -382,13 +382,23 @@ char* namesPtr = *node_names;
 
 for(int i = 0; i < num_taxa; i++){
     nodePtr->name = namesPtr;
-    printf("%s\n", nodePtr->name);
+   
     nodePtr++;
     namesPtr += INPUT_MAX + 1;
     
-    
 }
-    
+  // active node map just sets each array index to its index 
+  // [0, 1, 2, 3, 4, 5]
+  
+ int* activeNode = active_node_map;
+ 
+ for(int i = 0; i < num_taxa; i++){
+     *activeNode = i;
+   
+     activeNode++;
+     
+ }
+ 
     /* // FOR if
     c = fgetc(in);
     while(c != '\n'){
