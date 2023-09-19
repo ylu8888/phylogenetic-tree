@@ -53,52 +53,6 @@
  */
 
 int read_distance_data(FILE *in) {
-    
-   #include <stdlib.h>
-#include<stdio.h>
-#include<math.h>
-
-//#include "global.h"
-//#include "debug.h"
-
-/**
- * @brief Validates command line arguments passed to the program.
- * @details This function will validate all the arguments passed to the
- * program, returning 0 if validation succeeds and -1 if validation fails.
- * Upon successful return, the various options that were specified will be
- * encoded in the global variable 'global_options', where it will be
- * accessible elsewhere in the program. For details of the required
- * encoding, see the assignment handout.
- *
- * @param argc The number of arguments passed to the program from the CLI.
- * @param argv The argument strings passed to the program from the CLI.
- * @return 0 if validation succeeds and -1 if validation fails.
- * @modifies global variable "global_options" to contain an encoded representation
- * of the selected program options.
- */
-
-
-#define MAX_NODES 8
-#define INPUT_MAX 8
-#define MAX_TAXA 100
-int main()
-{
-    FILE *fp;
-
-    fp = fopen("text.txt", "r");
-
-    int number = read_distance_data(fp);
-
-    printf("%d", number);
-
-    return 0;
-}
-
-
-
-
-int read_distance_data(FILE *in) {
-   
     // TO BE IMPLEMENTED
     //ignore comments starting with # (good)
     //fields are terminated by comma or new line  
