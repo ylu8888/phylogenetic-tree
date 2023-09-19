@@ -114,7 +114,6 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
             if(lineCount > 0){
                 *distNum = c;
                 
-                
                 if(*distNum < '0' || *distNum > '9'){
                      return -1; //this means its not a valid double in matrix
                  }
@@ -181,13 +180,14 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
             
             // 53.25
              //THIS ONE IS FOR THE DISTANCE DATA
-            if(lineCount > 0){ 
+            if(lineCount > 0 && fieldCount > 1){ 
                 char *clear = input_buffer;
                 
-                while(numCount != 0){
+                while(numCount != 0 ){
                 *clear -= '0'; //convert to a double using ascii
                 dubNum += *clear * (pow(10, numCount - 1)); //multiply by 10 raised to numCount digits power
                 numCount--;  //decrement numCount after each multiplication
+                clear++;
                 }
                 
                 decCount *= -1;  //need decimal digits coutner to be negative for power raise
@@ -196,6 +196,7 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
                 *clear -= '0'; //convert to a double using ascii
                 dubNum += *clear * pow(10, decCount); //multiply by 10 raised to decCount digits power
                 decCount++;
+                clear++;
                 }
                
                 *matrixCheck = dubNum;
@@ -248,13 +249,14 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
             }
     }
     
-    if(lineCount > 0){ //NEED TO GET THE LAST DISTANCE DATA IN B/C IT BREAKS OUT OF WHILE LOOP AT '\n'
+    if(lineCount > 0 && fieldCount > 1){ //NEED TO GET THE LAST DISTANCE DATA IN B/C IT BREAKS OUT OF WHILE LOOP AT '\n'
                 char *clear = input_buffer;
                 
                 while(numCount != 0){
                 *clear -= '0'; //convert to a double using ascii
                 dubNum += *clear * (pow(10, numCount - 1)); //multiply by 10 raised to numCount digits power
                 numCount--;  //decrement numCount after each multiplication
+                clear++;
                 }
                 
                 decCount *= -1;  //need decimal digits coutner to be negative for power raise
@@ -263,6 +265,7 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
                 *clear -= '0'; //convert to a double using ascii
                 dubNum += *clear * (pow(10, decCount)); //multiply by 10 raised to decCount digits power
                 decCount++;
+                clear++;
                 }
                
                 *matrixCheck = dubNum;
@@ -317,7 +320,7 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
     
     
 }   
-    
+
     /* // FOR if
     c = fgetc(in);
     while(c != '\n'){
@@ -327,42 +330,6 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
 
     return 0; //return success
    
-    abort();
-}
-/**
- * @brief  Emit a representation of the phylogenetic tree in Newick
- * format to a specified output stream.
- * @details  This function emits a representation in Newick format
- * of a synthesized phylogenetic tree to a specified output stream.
- * See (https://en.wikipedia.org/wiki/Newick_format) for a description
- * of Newick format.  The tree that is output will include for each
- * node the name of that node and the edge distance from that node
- * its parent.  Note that Newick format basically is only applicable
- * to rooted trees, whereas the trees constructed by the neighbor
- * joining method are unrooted.  In order to turn an unrooted tree
- * into a rooted one, a root will be identified according by the
- * following method: one of the original leaf nodes will be designated
- * as the "outlier" and the unique node adjacent to the outlier
- * will serve as the root of the tree.  Then for any other two nodes
- * adjacent in the tree, the node closer to the root will be regarded
- * as the "parent" and the node farther from the root as a "child".
- * The outlier node itself will not be included as part of the rooted
- * tree that is output.  The node to be used as the outlier will be
- * determined as follows:  If the global variable "outlier_name" is
- * non-NULL, then the leaf node having that name will be used as
- * the outlier.  If the value of "outlier_name" is NULL, then the
- * leaf node having the greatest total distance to the other leaves
- * will be used as the outlier.
- *
- * @param out  Stream to which to output a rooted tree represented in
- * Newick format.
- * @return 0 in case the output is successfully emitted, otherwise -1
- * if any error occurred.  If the global variable "outlier_name" is
- * non-NULL, then it is an error if no leaf node with that name exists
- * in the tree.
- */
-int emit_newick_format(FILE *out) {
-    // TO BE IMPLEMENTED
     abort();
 }
 
