@@ -53,59 +53,6 @@
  */
 
 int read_distance_data(FILE *in) {
-    #include <stdlib.h>
-#include<stdio.h>
-#include<math.h>
-
-//#include "global.h"
-//#include "debug.h"
-
-/**
- * @brief Validates command line arguments passed to the program.
- * @details This function will validate all the arguments passed to the
- * program, returning 0 if validation succeeds and -1 if validation fails.
- * Upon successful return, the various options that were specified will be
- * encoded in the global variable 'global_options', where it will be
- * accessible elsewhere in the program. For details of the required
- * encoding, see the assignment handout.
- *
- * @param argc The number of arguments passed to the program from the CLI.
- * @param argv The argument strings passed to the program from the CLI.
- * @return 0 if validation succeeds and -1 if validation fails.
- * @modifies global variable "global_options" to contain an encoded representation
- * of the selected program options.
- */
-
-
-#define MAX_NODES 8
-#define INPUT_MAX 8
-#define MAX_TAXA 100
-int main()
-{
-    FILE *fp;
-
-    fp = fopen("text.txt", "r");
-
-    int number = read_distance_data(fp);
-
-    printf("%d", number);
-
-    return 0;
-}
-
-
-
-
-int read_distance_data(FILE *in) {
-    //these are global variables, using just for testing
-    char input_buffer[INPUT_MAX+1];
-    int num_taxa = 0;
-    char node_names[MAX_NODES][INPUT_MAX + 1];
-    int num_all_nodes = 0;
-    int num_active_nodes = 0;
-    double distances[MAX_NODES][MAX_NODES];
-    
-    
     // TO BE IMPLEMENTED
     //ignore comments starting with # (good)
     //fields are terminated by comma or new line  
@@ -140,7 +87,6 @@ int read_distance_data(FILE *in) {
     double* matrixCheck = *distances;
     int numCount = 0;
     int decCount = 0;
-    int decCount2 = -1;
     double dubNum = 0;
     int decimalBool = 0;
     int tempIndex = 0;
@@ -288,7 +234,6 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
         numCount = 0; //reset the counter for decimal distance digits
         dubNum = 0;
         decCount = 0;
-        decCount2 = 0;
         decimalBool = 0;
            
            //checking if fields are nonempty: b,5,0,1,
@@ -367,12 +312,6 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
    
     }
     
-    distNum = input_buffer;
-    dubNum = 0;
-    numCount = 0; 
-    decCount = 0;
-    decimalBool = 0;
-    decCount2 = 0;
     
      if(fieldCount != num_taxa){
         return -1; //error if fieldCount in each line does not equal num taxa
@@ -437,7 +376,7 @@ while (outer < num_taxa) {
     rows = cols;
 
 }
-
+  
     /* // FOR if
     c = fgetc(in);
     while(c != '\n'){
