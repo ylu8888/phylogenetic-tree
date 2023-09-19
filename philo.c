@@ -53,7 +53,7 @@
  */
 
 int read_distance_data(FILE *in) {
-    // TO BE IMPLEMENTED
+   // TO BE IMPLEMENTED
     //ignore comments starting with # (good)
     //fields are terminated by comma or new line  
     //if fields have more char than max_input then error (good)
@@ -92,6 +92,7 @@ int read_distance_data(FILE *in) {
     int tempIndex = 0;
     double *cols = *distances;
     double *rows = *distances;
+    int zeroDecBool = 0;
     
     
 
@@ -154,11 +155,22 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
              
              if(taxaCount % (num_taxa + 1) == 0 && lineCount >= 1){
                  if(c != '0'){
-                     return -1; //testing the 0 diagonals 
+                     if(zeroCount == 1 && c == '.'){
+                     char ex3 = fgetc(in);
+                     
+                     if(ex3 == ',' || ex3 == '0'){
+                         zeroDecBool = 1;
+                     }
+                     
+                     ungetc(ex3, in);
+                     }else{
+                           return -1; //testing the 0 diagonals 
+                     }
+                   
                  }
                  else{
                      zeroCount++;
-                     if(zeroCount > 1){
+                     if(zeroCount > 1 && zeroDecBool == 0){
                          return -1; //this means that theres more than 1 zero ex: "000"
                      }
                  }
@@ -382,7 +394,7 @@ char* namesPtr = *node_names;
 
 for(int i = 0; i < num_taxa; i++){
     nodePtr->name = namesPtr;
-   
+    printf("%s\n", nodePtr->name);
     nodePtr++;
     namesPtr += INPUT_MAX + 1;
     
@@ -394,11 +406,10 @@ for(int i = 0; i < num_taxa; i++){
  
  for(int i = 0; i < num_taxa; i++){
      *activeNode = i;
-   
+     printf("%d\n", *activeNode);
      activeNode++;
      
  }
- 
     /* // FOR if
     c = fgetc(in);
     while(c != '\n'){
@@ -410,6 +421,7 @@ for(int i = 0; i < num_taxa; i++){
    
     abort();
 }
+
 
 /**
  * @brief  Build a phylogenetic tree using the distance data read by
