@@ -376,7 +376,19 @@ while (outer < num_taxa) {
     rows = cols;
 
 }
-  
+
+NODE* nodePtr = nodes;
+char* namesPtr = *node_names;
+
+for(int i = 0; i < num_taxa; i++){
+    nodePtr->name = namesPtr;
+    printf("%s\n", nodePtr->name);
+    nodePtr++;
+    namesPtr += INPUT_MAX + 1;
+    
+    
+}
+    
     /* // FOR if
     c = fgetc(in);
     while(c != '\n'){
@@ -388,6 +400,7 @@ while (outer < num_taxa) {
    
     abort();
 }
+
 /**
  * @brief  Build a phylogenetic tree using the distance data read by
  * a prior successful invocation of read_distance_data().
