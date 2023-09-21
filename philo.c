@@ -530,5 +530,69 @@ int emit_distance_matrix(FILE *out) {
  */
 int build_taxonomy(FILE *out) {
     // TO BE IMPLEMENTED
+    //find the Qs for the distance matrix and find the minimum
+     // Q = 3 * 9 - (5 + 9 + 9 + 8) - (9 + 10 + 8 + 7)
+    double min = 999999;
+    double* matrixPtr = *distances;
+    //matrixPtr++;
+    double* rowPtr = *distances;
+    double q = 0;
+    double iSum = 0; 
+    double jSum = 0;
+    int inner = 0;
+    int outer = 0;
+        
+    while(outer < num_taxa){
+        inner = 0;
+        
+        while(inner < num_taxa){
+            if(*matrixPtr == 0){
+                matrixPtr++;
+                inner++;
+                continue;
+            }
+            q = (num_taxa - 2) * (*matrixPtr);
+            
+            for(int i = 0; i < num_taxa; i++){
+                iSum += *rowPtr;
+                rowPtr++;
+            }
+            
+            q -= iSum;
+            rowPtr = *distances;
+            rowPtr += inner * MAX_NODES; //move to j row for (i,j)
+            
+            for(int i = 0; i < num_taxa; i++){
+                jSum += *rowPtr;
+                rowPtr++;
+            }
+            
+            q -= jSum;
+            printf("%f\n", q);
+            if(q < min){
+                min = q;
+            }
+            
+            inner++;
+            q = 0;
+            jSum = 0;
+            iSum = 0;
+            
+            rowPtr = *distances;
+            rowPtr += outer * MAX_NODES; //move to i row for (i,j)
+            matrixPtr++;
+    
+        }
+        outer++;
+        rowPtr = *distances;
+        rowPtr += outer * MAX_NODES; //move to i row for (i,j)
+        matrixPtr = *distances;
+        matrixPtr += outer * MAX_NODES;
+    }
+    
+    
+    printf("%f\n", min);
+    
+    
     abort();
 }
