@@ -423,6 +423,65 @@ for(int i = 0; i < num_taxa; i++){
     abort();
 }
 
+/**
+ * @brief  Emit a representation of the phylogenetic tree in Newick
+ * format to a specified output stream.
+ * @details  This function emits a representation in Newick format
+ * of a synthesized phylogenetic tree to a specified output stream.
+ * See (https://en.wikipedia.org/wiki/Newick_format) for a description
+ * of Newick format.  The tree that is output will include for each
+ * node the name of that node and the edge distance from that node
+ * its parent.  Note that Newick format basically is only applicable
+ * to rooted trees, whereas the trees constructed by the neighbor
+ * joining method are unrooted.  In order to turn an unrooted tree
+ * into a rooted one, a root will be identified according by the
+ * following method: one of the original leaf nodes will be designated
+ * as the "outlier" and the unique node adjacent to the outlier
+ * will serve as the root of the tree.  Then for any other two nodes
+ * adjacent in the tree, the node closer to the root will be regarded
+ * as the "parent" and the node farther from the root as a "child".
+ * The outlier node itself will not be included as part of the rooted
+ * tree that is output.  The node to be used as the outlier will be
+ * determined as follows:  If the global variable "outlier_name" is
+ * non-NULL, then the leaf node having that name will be used as
+ * the outlier.  If the value of "outlier_name" is NULL, then the
+ * leaf node having the greatest total distance to the other leaves
+ * will be used as the outlier.
+ *
+ * @param out  Stream to which to output a rooted tree represented in
+ * Newick format.
+ * @return 0 in case the output is successfully emitted, otherwise -1
+ * if any error occurred.  If the global variable "outlier_name" is
+ * non-NULL, then it is an error if no leaf node with that name exists
+ * in the tree.
+ */
+int emit_newick_format(FILE *out) {
+    // TO BE IMPLEMENTED
+    abort();
+}
+
+/**
+ * @brief  Emit the synthesized distance matrix as CSV.
+ * @details  This function emits to a specified output stream a representation
+ * of the synthesized distance matrix resulting from the neighbor joining
+ * algorithm.  The output is in the same CSV form as the program input.
+ * The number of rows and columns of the matrix is equal to the value
+ * of num_all_nodes at the end of execution of the algorithm.
+ * The submatrix that consists of the first num_leaves rows and columns
+ * is identical to the matrix given as input.  The remaining rows and columns
+ * contain estimated distances to internal nodes that were synthesized during
+ * the execution of the algorithm.
+ *
+ * @param out  Stream to which to output a CSV representation of the
+ * synthesized distance matrix.
+ * @return 0 in case the output is successfully emitted, otherwise -1
+ * if any error occurred.
+ */
+int emit_distance_matrix(FILE *out) {
+    // TO BE IMPLEMENTED
+    abort();
+}
+
 
 /**
  * @brief  Build a phylogenetic tree using the distance data read by
