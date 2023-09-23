@@ -531,11 +531,14 @@ int emit_distance_matrix(FILE *out) {
 int build_taxonomy(FILE *out) {
      // TO BE IMPLEMENTED
     if(num_taxa > 2){
-        double min = 999999;
+    double min = 999999;
+    int iterations = 1;
+  
+  while(num_all_nodes != 2 * num_taxa - 2){
     double* matrixPtr = *distances;
     double *matrixPtr2 = *distances;
-    //matrixPtr++;
     double* rowPtr = *distances;
+    
     double q = 0;
     double iSum = 0; 
     double jSum = 0;
@@ -545,40 +548,142 @@ int build_taxonomy(FILE *out) {
     int outer = 0;
     int minRow = 0;
     int minCol = 0;
-        
-    //find the Qs for the distance matrix and find the minimum
+    int rowGarbage = 0; //row garbage boolean 
+    int colGarbage = 0;
+      
+    //***find the Qs for the distance matrix and find the minimum
     // Q = 3 * 9 - (5 + 9 + 9 + 8) - (9 + 10 + 8 + 7)
-  while(num_all_nodes != 2 * num_taxa - 2){
-    while(outer < num_taxa){
+    
+        while(outer < num_all_nodes){ //FOR SECOND ITERATION JUST JUMP TO U BECAUSE U ONLY NEED TO DO c,d,e to u
         inner = 0;
         
-        while(inner < num_taxa){
+        //CHECKING FOR garbage in ROWS
+        int* activeMapper = active_node_map;
+        for(int i = 0; i < num_active_nodes;i++){ 
+            if (outer == *activeMapper){
+                rowGarbage = 1; //this means that the row index IS inside the active nodemap
+                break;
+            }
+            activeMapper++;
+        }
+        
+        if(rowGarbage == 0){ //if the row index is NOT in activenodemap
+            outer++;
+            matrixPtr += MAX_NODES;
+            continue;
+        }
+        
+        rowPtr = matrixPtr; //****MOVE ROWPTR TO THE MATRIXPTR
+        
+        while(inner < num_all_nodes){
+        
+        //CHECKING FOR garbage in ROWS
+        activeMapper = active_node_map;
+        for(int i = 0; i < num_active_nodes;i++){ 
+            if (inner == *activeMapper){
+                colGarbage = 1; //this means that the row index IS inside the active nodemap
+                break;
+            }
+            activeMapper++;
+        }
+        
+        if(colGarbage == 0){ //if the row index is NOT in activenodemap
+            inner++;
+            matrixPtr++;
+            continue;
+        }
+        
             if(inner == outer){
                 matrixPtr++; //matrixPtr is the ptr that iterates thru the whole dist matrix to find each Q
                 inner++;
                 continue;
             }
-            q = (num_taxa - 2) * (*matrixPtr);
             
+            q = (num_active_nodes - 2) * (*matrixPtr);
+            
+            //CHANGE BACK TO NUM TAXA AND DO GARBAGE CHECK FOR SUMMATION DONT FORGET TO ADD U
+            //do math for jumping to the internal node
+            
+          
             for(int i = 0; i < num_taxa; i++){
+                //GARBAGE CHECK FOR THE SUMMATIONS 
+                activeMapper = active_node_map;
+                rowGarbage = 0;
+                for(int j = 0; j < num_active_nodes;j++){ 
+                    
+                    if (i == *activeMapper){
+                        rowGarbage = 1; //this means that the row index IS inside the active nodemap
+                        break;
+                    }
+                    activeMapper++;
+                }
+                if(rowGarbage == 0){ //if the row index is NOT in activenodemap
+                rowPtr++;
+                continue;
+                }
+                
                 iSum += *rowPtr; //rowPtr is the ptr that iterates through each row
                 rowPtr++;
             }
             
+            rowGarbage = 0;
+            rowPtr = *distances;
+            rowPtr += outer * MAX_NODES;
+            
+            if(iterations > 1){
+                for(int i = 0; i < num_all_nodes-1; i++){
+                rowPtr++;
+                }
+            
+              iSum += *rowPtr;
+             
+            }
+            
             q -= iSum;
+            
             rowPtr = *distances;
             rowPtr += inner * MAX_NODES; //move rowPtr to j row for (i,j)
             
             for(int i = 0; i < num_taxa; i++){
+                
+                activeMapper = active_node_map;
+                rowGarbage = 0;
+                for(int j = 0; j < num_active_nodes; j++){ 
+                    if (i == *activeMapper){
+                        rowGarbage = 1; //this means that the row index IS inside the active nodemap
+                        break;
+                    }
+                    activeMapper++;
+                }
+                
+                if(rowGarbage == 0){ //if the row index is NOT in activenodemap
+                rowPtr++;
+                continue;
+                }
+                
                 jSum += *rowPtr;
                 rowPtr++;
+            }
+            
+            rowGarbage = 0;
+            rowPtr = *distances;
+            rowPtr += inner * MAX_NODES;
+            
+            if(iterations > 1){
+                for(int i = 0; i < num_all_nodes-1; i++){
+                rowPtr++;
+                }
+            
+              jSum += *rowPtr;
+             
+             
             }
             
             q -= jSum;
             
             if(q < min){
                 min = q;
-                miniSum = iSum;
+                miniSum = iSum; // these are just for keeping track of the MIN (a,b)
                 minjSum = jSum;
                 matrixPtr2 = matrixPtr;
                 minRow = outer; // 0
@@ -589,6 +694,7 @@ int build_taxonomy(FILE *out) {
             q = 0;
             jSum = 0;
             iSum = 0;
+            colGarbage = 0;
             
             rowPtr = *distances;
             rowPtr += outer * MAX_NODES; //move rowPtr to i row for (i,j)
@@ -600,7 +706,8 @@ int build_taxonomy(FILE *out) {
         rowPtr += outer * MAX_NODES; //move to i row for (i,j)
         matrixPtr = *distances;
         matrixPtr += outer * MAX_NODES;
-    }
+        rowGarbage = 0; //reset the booleans after each iteration
+     }
   
     
     //FINDING DISTANCE FROM PAIR MEMBERS TO THE NEW NODE
@@ -610,14 +717,13 @@ int build_taxonomy(FILE *out) {
     double distA = 0;
     double distB = 0;
     
-    distA = ((1.0/2.0) * *matrixPtr2) + (1.0/(2.0*(num_taxa-2)) * (miniSum - minjSum));
+    distA = ((1.0/2.0) * *matrixPtr2) + (1.0/(2.0*(num_active_nodes-2)) * (miniSum - minjSum));
     distB = *matrixPtr2 - distA;
     
     //put the new distA & distB into the distance matrixPtr
     double* colPtr = *distances;
     double* rowPtr2 = *distances;
    
-    
     for(int i = 0; i < num_all_nodes; i++){ //put it in the columns first
         colPtr += MAX_NODES;
       
@@ -643,10 +749,12 @@ int build_taxonomy(FILE *out) {
     int inner2 = 0; //COLS
     double* matrixPtr3 = *distances;
     double* rowPtr3 = *distances;
-    
+
     while(outer2 < num_taxa){ // 5 times
         inner2 = 0;
+      
         while(inner2 < num_taxa){ // 5 times
+        
             if(inner2 == outer2 || (inner2 == minCol && outer2 == minRow) || (inner2 == minRow && outer2 == minCol)){ //if hit zero diag or hit the MIN (a,b)
                 matrixPtr3++;
                 inner2++;
@@ -673,7 +781,7 @@ int build_taxonomy(FILE *out) {
            taxaDist += *rowPtr3;
            taxaDist -= *matrixPtr2; //taxaDist - D(a,b) which is stored in matrixPtr2
            taxaDist /= 2.0;
-           printf("%f\n", taxaDist);
+          // printf("%f\n", taxaDist);
            
            //LETS PUT TAXADIST INTO DISTANCE MATRIX NOW 
            
@@ -687,12 +795,13 @@ int build_taxonomy(FILE *out) {
                *matrixPtr3++; //RESET GO NEXT
                 inner2++;
                 taxaDist = 0;
-             
+                
         }
         
         outer2++;
         matrixPtr3 = *distances;
         matrixPtr3 += outer2 * MAX_NODES;
+      
     }
     
     int* activePtr = active_node_map;
@@ -716,6 +825,9 @@ int build_taxonomy(FILE *out) {
     
     num_all_nodes++;  
     num_active_nodes--;
+    iterations++;
+    
+     
   } // end of while loop
 
 //when doing Q again for second step or distance in general, disregard internal nodes (u, v, z) 
@@ -739,9 +851,9 @@ int build_taxonomy(FILE *out) {
 //for int i = 0 check for garbage in rows
 //for int j = 0  check for garbage in cols
 //if i or j is NOT inside active node map just continue b/c those represent deactivated nodes eg (a,b)
-
-//what happens when we run into duplicate
+    
    
+    
     } //end of first if-statement
     abort();
 }
