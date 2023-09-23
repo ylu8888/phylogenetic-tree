@@ -529,38 +529,45 @@ int emit_distance_matrix(FILE *out) {
  * if any error occurred.
  */
 int build_taxonomy(FILE *out) {
-    // TO BE IMPLEMENTED
-    //find the Qs for the distance matrix and find the minimum
-     // Q = 3 * 9 - (5 + 9 + 9 + 8) - (9 + 10 + 8 + 7)
-    double min = 999999;
+     // TO BE IMPLEMENTED
+    if(num_taxa > 2){
+        double min = 999999;
     double* matrixPtr = *distances;
+    double *matrixPtr2 = *distances;
     //matrixPtr++;
     double* rowPtr = *distances;
     double q = 0;
     double iSum = 0; 
     double jSum = 0;
+    double miniSum = 0;
+    double minjSum = 0;
     int inner = 0;
     int outer = 0;
+    int minRow = 0;
+    int minCol = 0;
         
+    //find the Qs for the distance matrix and find the minimum
+    // Q = 3 * 9 - (5 + 9 + 9 + 8) - (9 + 10 + 8 + 7)
+  while(num_all_nodes != 2 * num_taxa - 2){
     while(outer < num_taxa){
         inner = 0;
         
         while(inner < num_taxa){
-            if(*matrixPtr == 0){
-                matrixPtr++;
+            if(inner == outer){
+                matrixPtr++; //matrixPtr is the ptr that iterates thru the whole dist matrix to find each Q
                 inner++;
                 continue;
             }
             q = (num_taxa - 2) * (*matrixPtr);
             
             for(int i = 0; i < num_taxa; i++){
-                iSum += *rowPtr;
+                iSum += *rowPtr; //rowPtr is the ptr that iterates through each row
                 rowPtr++;
             }
             
             q -= iSum;
             rowPtr = *distances;
-            rowPtr += inner * MAX_NODES; //move to j row for (i,j)
+            rowPtr += inner * MAX_NODES; //move rowPtr to j row for (i,j)
             
             for(int i = 0; i < num_taxa; i++){
                 jSum += *rowPtr;
@@ -568,9 +575,14 @@ int build_taxonomy(FILE *out) {
             }
             
             q -= jSum;
-            printf("%f\n", q);
+            
             if(q < min){
                 min = q;
+                miniSum = iSum;
+                minjSum = jSum;
+                matrixPtr2 = matrixPtr;
+                minRow = outer; // 0
+                minCol = inner; // 1
             }
             
             inner++;
@@ -579,7 +591,7 @@ int build_taxonomy(FILE *out) {
             iSum = 0;
             
             rowPtr = *distances;
-            rowPtr += outer * MAX_NODES; //move to i row for (i,j)
+            rowPtr += outer * MAX_NODES; //move rowPtr to i row for (i,j)
             matrixPtr++;
     
         }
@@ -589,10 +601,98 @@ int build_taxonomy(FILE *out) {
         matrixPtr = *distances;
         matrixPtr += outer * MAX_NODES;
     }
+  
+    
+    //FINDING DISTANCE FROM PAIR MEMBERS TO THE NEW NODE
+    //dist(a,u) = 1/2 * d(a,b) +  1 / 2(n-2) * [S(a) - S(b)] 
+    //dist(b,u) = d(a,b) - dist(a,u)
+    
+    double distA = 0;
+    double distB = 0;
+    
+    distA = ((1.0/2.0) * *matrixPtr2) + (1.0/(2.0*(num_taxa-2)) * (miniSum - minjSum));
+    distB = *matrixPtr2 - distA;
+    
+   
+    
+    //put the new distA & distB into the distance matrixPtr
+    double* colPtr = *distances;
+    double* rowPtr2 = *distances;
+    
+    for(int i = 0; i < num_all_nodes; i++){ //put it in the columns first
+        colPtr += MAX_NODES;
+    }   
+    
+    *colPtr = distA;
+    colPtr++;
+    *colPtr = distB;
+    colPtr++; //GO NEXT FOR THE NEW TAXADIST
+    
+    for(int i = 0; i < num_all_nodes; i++){ //put it in the rows second
+        rowPtr2++;
+    }
+    
+    *rowPtr2 = distA;
+    rowPtr2 += MAX_NODES;
+    *rowPtr2 = distB;
+    rowPtr2 += MAX_NODES; //GO NEXT FOR THE NEW TAXADIST
+    
+    //FINDING DISTANCE OF OTHER TAXA FROM THE NEW NODE
+    double taxaDist = 0;
+    int outer2 = 0; //ROWS
+    int inner2 = 0; //COLS
+    double* matrixPtr3 = *distances;
+    double* rowPtr3 = *distances;
+    
+    while(outer2 < num_taxa){
+        inner2 = 0;
+        while(inner2 < num_taxa){
+            if(inner2 == outer2 || (inner2 == minCol && outer2 == minRow) || (inner2 == minRow && outer2 == minCol)){ //if hit zero diag or hit the MIN (a,b)
+                matrixPtr3++;
+                inner2++;
+                continue;
+            }
+            
+           rowPtr3 = matrixPtr3; //set it equal to current place in matrix
+           for(int i = 0; i < minRow; i++){
+               rowPtr3 += MAX_NODES;
+           }
+           
+           taxaDist += *rowPtr3;
+           
+            //reset rowptr3 to start of dist matrix
+           for(int i = 0; i < minCol; i++){
+               rowPtr3 += MAX_NODES;
+           }
+           
+           taxaDist += *rowPtr3;
+           taxaDist -= *matrixPtr2; //taxaDist - D(a,b) which is stored in matrixPtr2
+           taxaDist /= 2.0;
+           //printf("%f\n", taxaDist);
+           
+           //LETS PUT TAXADIST INTO DISTANCE MATRIX NOW 
+           
+           *colPtr = taxaDist;
+           colPtr++;
+           *rowPtr2 = taxaDist;
+            rowPtr2 += MAX_NODES;
+            
+           *matrixPtr3++; //RESET GO NEXT
+            inner2++;
+            taxaDist = 0;
+        }
+        
+        outer2++;
+        matrixPtr3 = *distances;
+        matrixPtr3 += outer2 * MAX_NODES;
+    }
     
     
-    printf("%f\n", min);
+    num_all_nodes++;
+} // end of while loop
+
     
-    
+  
+    } //end of first if-statement
     abort();
 }
