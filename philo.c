@@ -548,7 +548,7 @@ int build_taxonomy(FILE *out) {
         
     //find the Qs for the distance matrix and find the minimum
     // Q = 3 * 9 - (5 + 9 + 9 + 8) - (9 + 10 + 8 + 7)
-  //while(num_all_nodes != 2 * num_taxa - 2){
+  while(num_all_nodes != 2 * num_taxa - 2){
     while(outer < num_taxa){
         inner = 0;
         
@@ -677,7 +677,7 @@ int build_taxonomy(FILE *out) {
            
            //LETS PUT TAXADIST INTO DISTANCE MATRIX NOW 
            
-             if(outer2 == minRow){
+             if(outer2 == minRow){ // only if row is equal to minRow because we only care about c,d,e in relation to u
                *colPtr = taxaDist;
                 colPtr++;
                *rowPtr2 = taxaDist;
@@ -695,9 +695,28 @@ int build_taxonomy(FILE *out) {
         matrixPtr3 += outer2 * MAX_NODES;
     }
     
+    int* activePtr = active_node_map;
+    int* activePtr2 = active_node_map;
     
-    num_all_nodes++;
-  //} // end of while loop
+    for(int i = 0; i < minRow; i++){
+        activePtr++; //go to active nodemap[a] and set it equal to num all nodes
+    }
+    *activePtr = num_all_nodes;
+    
+    activePtr = active_node_map; 
+    for(int i = 0; i < minCol; i++){
+        activePtr++;  //go to activenodemap[b] 
+    }
+    
+    for(int i = 0; i < (num_active_nodes-1); i++){
+        activePtr2++; // go to activenodemap[num_active_node - 1];
+    }
+    
+    *activePtr = *activePtr2;
+    
+    num_all_nodes++;  
+    num_active_nodes--;
+  } // end of while loop
 
 //when doing Q again for second step or distance in general, disregard internal nodes (u, v, z) 
 // only go up to taxa and keep account of deactivated taxa, ONLY use active taxa
@@ -709,20 +728,20 @@ int build_taxonomy(FILE *out) {
 //go to activenodemap[b] = activenodemap[num_active_node - 1];
 //aka activenodemap[1] = activenodemap[4];
 //increment num all nodes++;
-//num active nodes --;
+//decrement num active nodes --;
 
 //the most improtant is num active nodes, the number tells us how many nodes are still usable
 // aka how many are still not deactivated or joined yet
 
-//for(int i = 0; i < num_active_nodes; i++)
+//for(int i = 0; i < num_active_nodes; i++) iterate through the activenodemap!!
 // lets say we're iterating through the matrix 
 //double for loop one for cols one for rows , Check for garbage 
-//double for loop int i = 0 check for garbage in rows
-//int j = 0  check for garbage in cols
+//for int i = 0 check for garbage in rows
+//for int j = 0  check for garbage in cols
 //if i or j is NOT inside active node map just continue b/c those represent deactivated nodes eg (a,b)
-    
-    
-    
+
+//what happens when we run into duplicate
+   
     } //end of first if-statement
     abort();
 }
