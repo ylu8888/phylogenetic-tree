@@ -548,7 +548,7 @@ int build_taxonomy(FILE *out) {
         
     //find the Qs for the distance matrix and find the minimum
     // Q = 3 * 9 - (5 + 9 + 9 + 8) - (9 + 10 + 8 + 7)
-  while(num_all_nodes != 2 * num_taxa - 2){
+  //while(num_all_nodes != 2 * num_taxa - 2){
     while(outer < num_taxa){
         inner = 0;
         
@@ -613,14 +613,14 @@ int build_taxonomy(FILE *out) {
     distA = ((1.0/2.0) * *matrixPtr2) + (1.0/(2.0*(num_taxa-2)) * (miniSum - minjSum));
     distB = *matrixPtr2 - distA;
     
-   
-    
     //put the new distA & distB into the distance matrixPtr
     double* colPtr = *distances;
     double* rowPtr2 = *distances;
+   
     
     for(int i = 0; i < num_all_nodes; i++){ //put it in the columns first
         colPtr += MAX_NODES;
+      
     }   
     
     *colPtr = distA;
@@ -644,13 +644,18 @@ int build_taxonomy(FILE *out) {
     double* matrixPtr3 = *distances;
     double* rowPtr3 = *distances;
     
-    while(outer2 < num_taxa){
+    while(outer2 < num_taxa){ // 5 times
         inner2 = 0;
-        while(inner2 < num_taxa){
+        while(inner2 < num_taxa){ // 5 times
             if(inner2 == outer2 || (inner2 == minCol && outer2 == minRow) || (inner2 == minRow && outer2 == minCol)){ //if hit zero diag or hit the MIN (a,b)
                 matrixPtr3++;
                 inner2++;
                 continue;
+            }
+            
+            if(inner2 == outer2){
+                *colPtr = 0;
+                colPtr++;
             }
             
            rowPtr3 = matrixPtr3; //set it equal to current place in matrix
@@ -668,18 +673,21 @@ int build_taxonomy(FILE *out) {
            taxaDist += *rowPtr3;
            taxaDist -= *matrixPtr2; //taxaDist - D(a,b) which is stored in matrixPtr2
            taxaDist /= 2.0;
-           //printf("%f\n", taxaDist);
+           printf("%f\n", taxaDist);
            
            //LETS PUT TAXADIST INTO DISTANCE MATRIX NOW 
            
-           *colPtr = taxaDist;
-           colPtr++;
-           *rowPtr2 = taxaDist;
-            rowPtr2 += MAX_NODES;
-            
-           *matrixPtr3++; //RESET GO NEXT
-            inner2++;
-            taxaDist = 0;
+             if(outer2 == minRow){
+               *colPtr = taxaDist;
+                colPtr++;
+               *rowPtr2 = taxaDist;
+                rowPtr2 += MAX_NODES;
+             }
+              
+               *matrixPtr3++; //RESET GO NEXT
+                inner2++;
+                taxaDist = 0;
+             
         }
         
         outer2++;
@@ -689,10 +697,32 @@ int build_taxonomy(FILE *out) {
     
     
     num_all_nodes++;
-} // end of while loop
+  //} // end of while loop
 
+//when doing Q again for second step or distance in general, disregard internal nodes (u, v, z) 
+// only go up to taxa and keep account of deactivated taxa, ONLY use active taxa
+//if c and d are being joined and you have V you need to do the summation up to num_taxa and then add v as well
+
+//use active node map for all iterations in total
+//when u join a and b to U, go to active nodemap[a] and set it equal to num all nodes
+//aka activenodemap[0] = 5 ^^^
+//go to activenodemap[b] = activenodemap[num_active_node - 1];
+//aka activenodemap[1] = activenodemap[4];
+//increment num all nodes++;
+//num active nodes --;
+
+//the most improtant is num active nodes, the number tells us how many nodes are still usable
+// aka how many are still not deactivated or joined yet
+
+//for(int i = 0; i < num_active_nodes; i++)
+// lets say we're iterating through the matrix 
+//double for loop one for cols one for rows , Check for garbage 
+//double for loop int i = 0 check for garbage in rows
+//int j = 0  check for garbage in cols
+//if i or j is NOT inside active node map just continue b/c those represent deactivated nodes eg (a,b)
     
-  
+    
+    
     } //end of first if-statement
     abort();
 }
