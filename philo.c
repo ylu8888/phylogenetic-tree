@@ -862,6 +862,7 @@ int build_taxonomy(FILE *out) {
                       //CHILD PARENT DISTANCE
                      fprintf(fp2, "%d, %d, %0.2f\n", minRow, num_all_nodes, distA);
                      fprintf(fp2, "%d, %d, %0.2f\n", minCol, num_all_nodes, distB);
+                    
                      printCount++;
                  }
              }
@@ -908,10 +909,26 @@ int build_taxonomy(FILE *out) {
     
     *activePtr = *activePtr2;
     
+    int* lastNodePtr = active_node_map;
+     if(num_active_nodes == 3){
+        for(int i = 0; i < num_active_nodes; i++){
+            if(*lastNodePtr != num_all_nodes){
+                break;
+            }
+            lastNodePtr++;
+        }
+        
+     double* lastChance = *distances;
+     lastChance += *lastNodePtr * MAX_NODES;
+     lastChance += num_all_nodes;
+     fprintf(fp2, "%d, %d, %0.2f\n", *lastNodePtr, num_all_nodes, *lastChance);
+    }
+   
     num_all_nodes++;  
     num_active_nodes--;
     iterations++;
     printCount = 0; //reset the fprintf to output
+    
     
   } // end of while loop
 
@@ -936,8 +953,7 @@ int build_taxonomy(FILE *out) {
 //for int i = 0 check for garbage in rows
 //for int j = 0  check for garbage in cols
 //if i or j is NOT inside active node map just continue b/c those represent deactivated nodes eg (a,b)
-    
-    
+  
     return 0;
     } //end of first if-statement
     abort();
