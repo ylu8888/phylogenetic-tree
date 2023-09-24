@@ -531,14 +531,14 @@ int emit_distance_matrix(FILE *out) {
 int build_taxonomy(FILE *out) {
      // TO BE IMPLEMENTED
     if(num_taxa > 2){
-    double min = 999999;
+    
     int iterations = 1;
   
   while(num_all_nodes != 2 * num_taxa - 2){
+    double min = 999999;
     double* matrixPtr = *distances;
     double *matrixPtr2 = *distances;
     double* rowPtr = *distances;
-    
     double q = 0;
     double iSum = 0; 
     double jSum = 0;
@@ -550,6 +550,7 @@ int build_taxonomy(FILE *out) {
     int minCol = 0;
     int rowGarbage = 0; //row garbage boolean 
     int colGarbage = 0;
+    int* activeMapper = active_node_map;
       
     //***find the Qs for the distance matrix and find the minimum
     // Q = 3 * 9 - (5 + 9 + 9 + 8) - (9 + 10 + 8 + 7)
@@ -558,7 +559,7 @@ int build_taxonomy(FILE *out) {
         inner = 0;
         
         //CHECKING FOR garbage in ROWS
-        int* activeMapper = active_node_map;
+        activeMapper = active_node_map;
         for(int i = 0; i < num_active_nodes;i++){ 
             if (outer == *activeMapper){
                 rowGarbage = 1; //this means that the row index IS inside the active nodemap
@@ -681,7 +682,11 @@ int build_taxonomy(FILE *out) {
             
             q -= jSum;
             
-            if(q < min){
+        //   if(iterations > 1){
+        //          printf("%f\n", q);
+        //     }
+            
+            if(q < min){ 
                 min = q;
                 miniSum = iSum; // these are just for keeping track of the MIN (a,b)
                 minjSum = jSum;
@@ -720,76 +725,160 @@ int build_taxonomy(FILE *out) {
     distA = ((1.0/2.0) * *matrixPtr2) + (1.0/(2.0*(num_active_nodes-2)) * (miniSum - minjSum));
     distB = *matrixPtr2 - distA;
     
+    if(iterations == 3){
+        printf("%f\n", min);
+        printf("%f\n", miniSum);
+        printf("%f\n", minjSum);
+        printf("%f\n", distA);
+        printf("%f\n", distB);
+        printf("%d\n", minRow);
+        printf("%d\n", minCol);
+    
+    }
+    
     //put the new distA & distB into the distance matrixPtr
     double* colPtr = *distances;
     double* rowPtr2 = *distances;
    
-    for(int i = 0; i < num_all_nodes; i++){ //put it in the columns first
-        colPtr += MAX_NODES;
-      
-    }   
-    
+   //DO NOT PUT IT AT THE FRONT OF THE ROW IT DEPENDS ON THE iterations
+    colPtr += num_all_nodes * MAX_NODES; //put it in the columns first
+    colPtr += minRow;
     *colPtr = distA;
-    colPtr++;
+    
+    colPtr = *distances;
+    colPtr += num_all_nodes * MAX_NODES;
+    colPtr += minCol;
     *colPtr = distB;
-    colPtr++; //GO NEXT FOR THE NEW TAXADIST
     
-    for(int i = 0; i < num_all_nodes; i++){ //put it in the rows second
-        rowPtr2++;
-    }
-    
+    rowPtr2 += minRow * MAX_NODES;
+    rowPtr2 += num_all_nodes;
     *rowPtr2 = distA;
-    rowPtr2 += MAX_NODES;
+    
+    rowPtr2 = *distances;
+    rowPtr2 += num_all_nodes;
+    rowPtr2 += minCol * MAX_NODES;
     *rowPtr2 = distB;
-    rowPtr2 += MAX_NODES; //GO NEXT FOR THE NEW TAXADIST
+    
     
     //FINDING DISTANCE OF OTHER TAXA FROM THE NEW NODE
     double taxaDist = 0;
     int outer2 = 0; //ROWS
     int inner2 = 0; //COLS
-    double* matrixPtr3 = *distances;
+    double* matrixPtr3 = *distances; // for iterating thru the dist matrix
     double* rowPtr3 = *distances;
 
     while(outer2 < num_taxa){ // 5 times
+    
+        activeMapper = active_node_map;
+        rowGarbage = 0;
+        for(int j = 0; j < num_active_nodes; j++){ 
+            if (outer2 == *activeMapper){
+                rowGarbage = 1; //this means that the row index IS inside the active nodemap
+                break;
+            }
+            activeMapper++;
+        }
+        
+        if(rowGarbage == 0){ //if the row index is NOT in activenodemap
+        outer2++;
+        matrixPtr3 += MAX_NODES;
+        continue;
+        }
+        rowGarbage = 0;
+        
         inner2 = 0;
       
         while(inner2 < num_taxa){ // 5 times
+            activeMapper = active_node_map;
+            rowGarbage = 0;
+            for(int j = 0; j < num_active_nodes; j++){ 
+                if (inner2 == *activeMapper){
+                    rowGarbage = 1; //this means that the row index IS inside the active nodemap
+                    break;
+                }
+                activeMapper++;
+            }
+            
+            if(rowGarbage == 0){ //if the row index is NOT in activenodemap
+            inner2++;
+            matrixPtr3++;
+            continue;
+            }
+            rowGarbage = 0;
+            
+            //c, u 
+            //2, 5
+            
+            //minRow == 2
+            //minCol == 5
+            //inner2 = columns
+            //outer2 = rows
         
-            if(inner2 == outer2 || (inner2 == minCol && outer2 == minRow) || (inner2 == minRow && outer2 == minCol)){ //if hit zero diag or hit the MIN (a,b)
+            if((inner2 == minCol && outer2 == minRow) || (inner2 == minRow && outer2 == minCol)){ //if hit zero diag or hit the MIN (a,b)
                 matrixPtr3++;
                 inner2++;
                 continue;
             }
             
             if(inner2 == outer2){
-                *colPtr = 0;
-                colPtr++;
+                *matrixPtr3 = 0;
+                inner2++;
+                matrixPtr3++;
+                continue;
             }
             
-           rowPtr3 = matrixPtr3; //set it equal to current place in matrix
-           for(int i = 0; i < minRow; i++){
-               rowPtr3 += MAX_NODES;
-           }
-           
+            // if(inner2 == minRow){
+            //     inner2++;
+            //     matrixPtr3++;
+            //     continue;
+            // }
+            
+            // if(outer2 == minRow){
+            //     outer2++;
+            //     matrixPtr3 += MAX_NODES;
+            //     continue;
+            // }
+            
+            
+        //when were finding the distance to the other node taxas, we go to the row 
+        // we go to the row of our children and then go to the column of the node that we're currently on
+        //first go to u, then go to d
+        //then go to c, then go to d
+        
+        //second go to u, then go to e
+        //then go to c, then go to e
+            
+           //set it equal to current place in matrix
+           rowPtr3 = *distances;
+           rowPtr3 += minRow * MAX_NODES;
+           rowPtr3 += inner2;
            taxaDist += *rowPtr3;
            
             //reset rowptr3 to start of dist matrix
-           for(int i = 0; i < minCol; i++){
-               rowPtr3 += MAX_NODES;
-           }
-           
+           rowPtr3 = *distances;
+           rowPtr3 += minCol * MAX_NODES;
+           rowPtr3 += inner2;
            taxaDist += *rowPtr3;
+           
            taxaDist -= *matrixPtr2; //taxaDist - D(a,b) which is stored in matrixPtr2
            taxaDist /= 2.0;
-          // printf("%f\n", taxaDist);
+          if(iterations == 3){
+           // printf("%f\n", taxaDist);
+          }
            
            //LETS PUT TAXADIST INTO DISTANCE MATRIX NOW 
            
              if(outer2 == minRow){ // only if row is equal to minRow because we only care about c,d,e in relation to u
-               *colPtr = taxaDist;
-                colPtr++;
-               *rowPtr2 = taxaDist;
-                rowPtr2 += MAX_NODES;
+                colPtr = *distances;
+                colPtr += num_all_nodes * MAX_NODES;
+                colPtr += inner2;
+                *colPtr = taxaDist;
+                
+                rowPtr2 = *distances;
+                rowPtr2 += num_all_nodes;
+                rowPtr2 += inner2 * MAX_NODES;
+                *rowPtr2 = taxaDist;
+            
              }
               
                *matrixPtr3++; //RESET GO NEXT
@@ -815,7 +904,7 @@ int build_taxonomy(FILE *out) {
     activePtr = active_node_map; 
     for(int i = 0; i < minCol; i++){
         activePtr++;  //go to activenodemap[b] 
-    }
+    } 
     
     for(int i = 0; i < (num_active_nodes-1); i++){
         activePtr2++; // go to activenodemap[num_active_node - 1];
@@ -852,7 +941,7 @@ int build_taxonomy(FILE *out) {
 //for int j = 0  check for garbage in cols
 //if i or j is NOT inside active node map just continue b/c those represent deactivated nodes eg (a,b)
     
-   
+  
     
     } //end of first if-statement
     abort();
