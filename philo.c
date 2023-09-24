@@ -580,14 +580,7 @@ int build_taxonomy(FILE *out) {
         
         //CHECKING FOR garbage in ROWS
          if(inner == outer){
-                //WE ARE AT ROW 4 AND COL 4 AND WE ARE DOING MATRIXPTR++ SO WE HIT ROW U TO GET 6
-                // if(inner == num_taxa - 1 && outer == num_taxa - 1){
-                //     matrixPtr -= inner;
-                //     matrixPtr += num_all_nodes;
-                //   inner++;
-                //   continue;
-                    
-                //  }
+              
                 matrixPtr++;
                  inner++; 
                 
@@ -609,8 +602,6 @@ int build_taxonomy(FILE *out) {
             continue;
         }
         
-           
-            
             q = (num_active_nodes - 2) * (*matrixPtr);
             
             //CHANGE BACK TO NUM TAXA AND DO GARBAGE CHECK FOR SUMMATION DONT FORGET TO ADD U
@@ -691,10 +682,7 @@ int build_taxonomy(FILE *out) {
             
             q -= jSum;
             
-        //   if(iterations == 3){
-        //         printf("%f\n", q);
-        //     }
-            
+     
             if(q < min){ 
                 min = q;
                 miniSum = iSum; // these are just for keeping track of the MIN (a,b)
@@ -734,6 +722,7 @@ int build_taxonomy(FILE *out) {
     
     distA = ((1.0/2.0) * *matrixPtr2) + (1.0/(2.0*(num_active_nodes-2)) * (miniSum - minjSum));
     distB = *matrixPtr2 - distA;
+
     
     //put the new distA & distB into the distance matrixPtr
     double* colPtr = *distances;
@@ -749,7 +738,7 @@ int build_taxonomy(FILE *out) {
     colPtr += minCol;
     *colPtr = distB;
     
-    rowPtr2 += minRow * MAX_NODES;
+    rowPtr2 += minRow * MAX_NODES; 
     rowPtr2 += num_all_nodes;
     *rowPtr2 = distA;
     
@@ -765,6 +754,7 @@ int build_taxonomy(FILE *out) {
     int inner2 = 0; //COLS
     double* matrixPtr3 = *distances; // for iterating thru the dist matrix
     double* rowPtr3 = *distances;
+    int printCount = 0;
 
     while(outer2 < num_all_nodes){ // 5 times
     
@@ -821,6 +811,15 @@ int build_taxonomy(FILE *out) {
             }
             rowGarbage = 0;
             
+            //c, u 
+            //2, 5
+            
+            //minRow == 2
+            //minCol == 5
+            //inner2 = columns
+            //outer2 = rows
+        
+            
         //when were finding the distance to the other node taxas, we go to the row 
         // we go to the row of our children and then go to the column of the node that we're currently on
         //first go to u, then go to d
@@ -844,6 +843,8 @@ int build_taxonomy(FILE *out) {
            taxaDist -= *matrixPtr2; //taxaDist - D(a,b) which is stored in matrixPtr2
            taxaDist /= 2.0;
            
+        
+       
            //LETS PUT TAXADIST INTO DISTANCE MATRIX NOW 
            
              if(outer2 == minRow){ // only if row is equal to minRow because we only care about c,d,e in relation to u
@@ -856,8 +857,17 @@ int build_taxonomy(FILE *out) {
                 rowPtr2 += num_all_nodes;
                 rowPtr2 += inner2 * MAX_NODES;
                 *rowPtr2 = taxaDist;
-            
+                
+                 while(printCount < 1){
+                      //CHILD PARENT DISTANCE
+                     fprintf(fp2, "%d, %d, %0.2f\n", minRow, num_all_nodes, distA);
+                     fprintf(fp2, "%d, %d, %0.2f\n", minCol, num_all_nodes, distB);
+                     printCount++;
+                 }
              }
+             
+             
+              
               
                *matrixPtr3++; //RESET GO NEXT
                 inner2++;
@@ -871,6 +881,7 @@ int build_taxonomy(FILE *out) {
       
     }
     
+      
     int* activePtr = active_node_map;
     int* activePtr2 = active_node_map;
 
@@ -900,6 +911,7 @@ int build_taxonomy(FILE *out) {
     num_all_nodes++;  
     num_active_nodes--;
     iterations++;
+    printCount = 0; //reset the fprintf to output
     
   } // end of while loop
 
@@ -924,8 +936,9 @@ int build_taxonomy(FILE *out) {
 //for int i = 0 check for garbage in rows
 //for int j = 0  check for garbage in cols
 //if i or j is NOT inside active node map just continue b/c those represent deactivated nodes eg (a,b)
-   
     
+    
+    return 0;
     } //end of first if-statement
     abort();
 }
