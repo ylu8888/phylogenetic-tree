@@ -53,23 +53,6 @@
  */
 
 int read_distance_data(FILE *in) {
-    //these are global variables, using just for testing
-    char input_buffer[INPUT_MAX+1];
-    int num_taxa = 0;
-    char node_names[MAX_NODES][INPUT_MAX + 1];
-    int num_all_nodes = 0;
-    int num_active_nodes = 0;
-    double distances[MAX_NODES][MAX_NODES];
-    int active_node_map[MAX_NODES];
-    
-    typedef struct node {
-    char *name;
-    struct node *neighbors[3];
-} NODE;
-
-    NODE nodes[MAX_NODES];
-    
-    
     // TO BE IMPLEMENTED
     //ignore comments starting with # (good)
     //fields are terminated by comma or new line  
