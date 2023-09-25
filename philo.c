@@ -1,5 +1,5 @@
 #include <stdlib.h>
-
+#include <math.h>
 #include "global.h"
 #include "debug.h"
 
@@ -53,7 +53,7 @@
  */
 
 int read_distance_data(FILE *in) {
-   // TO BE IMPLEMENTED
+    // TO BE IMPLEMENTED
     //ignore comments starting with # (good)
     //fields are terminated by comma or new line  
     //if fields have more char than max_input then error (good)
@@ -93,7 +93,6 @@ int read_distance_data(FILE *in) {
     double *cols = *distances;
     double *rows = *distances;
     int zeroDecBool = 0;
-    
     
 
 while(c != '\0'){ //NULL termi means we reached the end of the file input
@@ -394,7 +393,7 @@ char* namesPtr = *node_names;
 
 for(int i = 0; i < num_taxa; i++){
     nodePtr->name = namesPtr;
-    printf("%s\n", nodePtr->name);
+    
     nodePtr++;
     namesPtr += INPUT_MAX + 1;
     
@@ -406,10 +405,11 @@ for(int i = 0; i < num_taxa; i++){
  
  for(int i = 0; i < num_taxa; i++){
      *activeNode = i;
-     printf("%d\n", *activeNode);
+    
      activeNode++;
      
  }
+    
 
     /* // FOR if
     c = fgetc(in);
@@ -481,7 +481,6 @@ int emit_distance_matrix(FILE *out) {
     // TO BE IMPLEMENTED
     abort();
 }
-
 
 /**
  * @brief  Build a phylogenetic tree using the distance data read by
@@ -860,14 +859,14 @@ int build_taxonomy(FILE *out) {
                 
                  while(printCount < 1){
                       //CHILD PARENT DISTANCE
-                     fprintf(fp2, "%d, %d, %0.2f\n", minRow, num_all_nodes, distA);
-                     fprintf(fp2, "%d, %d, %0.2f\n", minCol, num_all_nodes, distB);
+                     fprintf(out, "%d, %d, %0.2f\n", minRow, num_all_nodes, distA);
+                     fprintf(out, "%d, %d, %0.2f\n", minCol, num_all_nodes, distB);
                     
                      printCount++;
                  }
              }
               
-               *matrixPtr3++; //RESET GO NEXT
+                matrixPtr3++; //RESET GO NEXT
                 inner2++;
                 taxaDist = 0;
                 
@@ -918,7 +917,7 @@ int build_taxonomy(FILE *out) {
      double* lastChance = *distances;
      lastChance += *lastNodePtr * MAX_NODES;
      lastChance += num_all_nodes;
-     fprintf(fp2, "%d, %d, %0.2f\n", *lastNodePtr, num_all_nodes, *lastChance);
+     fprintf(out, "%d, %d, %0.2f\n", *lastNodePtr, num_all_nodes, *lastChance);
     }
     
     //PUT INTO NODE NAMES 
@@ -1033,7 +1032,7 @@ int build_taxonomy(FILE *out) {
         double* edgeCasePtr = *distances;
         edgeCasePtr++;
         
-        fprintf(fp2, "%d, %d, %0.2f\n", 0, 1, *edgeCasePtr);
+        fprintf(out, "%d, %d, %0.2f\n", 0, 1, *edgeCasePtr);
       
     }
     
