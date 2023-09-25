@@ -479,6 +479,21 @@ for(int i = 0; i < num_taxa; i++){
  */
 int emit_newick_format(FILE *out) {
     // TO BE IMPLEMENTED
+    //if no outlier is provided the default is the row/col with the largest sum
+    //go to the leaf node which is b by default or the outlier
+    //go to the leaf nodes parent node which is U for b 
+    //get the distance of D(u,b)
+    //go next and get D(u, a)
+    //go next but since the next is the leaf node b, we go to U's parent node
+    //U's parent is V since u and c joined to make V, now we start again recursively
+    //D(u, v) is 3 so print that and get D(v, c) and go next
+    //now we go next, but next is U and that is our leaf node
+    //thus, we restart again recursively and reach V's parent node 
+     if(out == NULL){
+        return -1; //error case
+    }
+    
+    return 0;
     abort();
 }
 
@@ -501,6 +516,10 @@ int emit_newick_format(FILE *out) {
  */
 int emit_distance_matrix(FILE *out) {
     // TO BE IMPLEMENTED
+     if(out == NULL){
+        return -1; //error case
+    }
+    
     if(num_taxa > 2){
     
     int iterations = 1;
@@ -1110,6 +1129,10 @@ int emit_distance_matrix(FILE *out) {
  */
 int build_taxonomy(FILE *out) {
     // TO BE IMPLEMENTED
+    if(out == NULL){
+        return -1; //error case
+    }
+    
     if(num_taxa > 2){
     
     int iterations = 1;
@@ -1257,7 +1280,6 @@ int build_taxonomy(FILE *out) {
             
               jSum += *rowPtr;
              
-             
             }
             
             q -= jSum;
@@ -1398,7 +1420,6 @@ int build_taxonomy(FILE *out) {
             //minCol == 5
             //inner2 = columns
             //outer2 = rows
-        
             
         //when were finding the distance to the other node taxas, we go to the row 
         // we go to the row of our children and then go to the column of the node that we're currently on
@@ -1408,7 +1429,6 @@ int build_taxonomy(FILE *out) {
         //second go to u, then go to e
         //then go to c, then go to e
             
-           //set it equal to current place in matrix
            rowPtr3 = *distances;
            rowPtr3 += minRow * MAX_NODES;
            rowPtr3 += inner2;
@@ -1426,7 +1446,7 @@ int build_taxonomy(FILE *out) {
        
            //LETS PUT TAXADIST INTO DISTANCE MATRIX NOW 
            
-             if(outer2 == minRow){ // only if row is equal to minRow because we only care about c,d,e in relation to u
+             if(outer2 == minCol){ // only if row is equal to minCol because we only care about c,d,e in relation to u
                 colPtr = *distances;
                 colPtr += num_all_nodes * MAX_NODES;
                 colPtr += inner2;
@@ -1439,8 +1459,8 @@ int build_taxonomy(FILE *out) {
                 
                  while(printCount < 1){
                       //CHILD PARENT DISTANCE
-                     fprintf(fp2, "%d, %d, %0.2f\n", minRow, num_all_nodes, distA);
-                     fprintf(fp2, "%d, %d, %0.2f\n", minCol, num_all_nodes, distB);
+                     fprintf(out, "%d, %d, %0.2f\n", minRow, num_all_nodes, distA);
+                     fprintf(out, "%d, %d, %0.2f\n", minCol, num_all_nodes, distB);
                     
                      printCount++;
                  }
@@ -1498,7 +1518,7 @@ int build_taxonomy(FILE *out) {
      double* lastChance = *distances;
      lastChance += *lastNodePtr * MAX_NODES;
      lastChance += num_all_nodes;
-     fprintf(fp2, "%d, %d, %0.2f\n", *lastNodePtr, num_all_nodes, *lastChance);
+     fprintf(out, "%d, %d, %0.2f\n", *lastNodePtr, num_all_nodes, *lastChance);
     }
     
     //PUT INTO NODE NAMES 
@@ -1574,7 +1594,7 @@ int build_taxonomy(FILE *out) {
        nodePtr->name = newNamer;
        nodePtr++;
        
-        //FOR NEIGHBORS Just go to when you create a new node U using a and b,
+    //FOR NEIGHBORS Just go to when you create a new node U using a and b,
     //go to U in the Nodes array and set its neighbor[1] = a and neighbor[2] = b
     //then you go to A in Nodes and set its neighbor[0] = u
     //then you go to B in Nodes and set its neighbor[0] = u
@@ -1605,8 +1625,7 @@ int build_taxonomy(FILE *out) {
     nodeyPtr = nodes;
     nodeyPtr += num_all_nodes;
     *neighPtr = nodeyPtr; //set its neighbor[0] to u
-
-   
+        
    //RESET STUFF
     num_all_nodes++;  
     num_active_nodes--;
@@ -1636,7 +1655,13 @@ int build_taxonomy(FILE *out) {
 //for int i = 0 check for garbage in rows
 //for int j = 0  check for garbage in cols
 //if i or j is NOT inside active node map just continue b/c those represent deactivated nodes eg (a,b)
-  
+    
+    // NODE* abc = nodes;
+    // abc += 7;
+    //   printf("%s\n", abc->neighbors[0]->name);
+    //     printf("%s\n", abc->neighbors[1]->name);
+    //     printf("%s\n", abc->neighbors[2]->name);
+       
     } //end of first if-statement
     
     if(num_taxa == 2){ //EDGE CASE 
@@ -1644,7 +1669,7 @@ int build_taxonomy(FILE *out) {
         double* edgeCasePtr = *distances;
         edgeCasePtr++;
         
-        fprintf(fp2, "%d, %d, %0.2f\n", 0, 1, *edgeCasePtr);
+        fprintf(out, "%d, %d, %0.2f\n", 0, 1, *edgeCasePtr);
       
     }
     
