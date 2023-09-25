@@ -53,6 +53,23 @@
  */
 
 int read_distance_data(FILE *in) {
+    //these are global variables, using just for testing
+    char input_buffer[INPUT_MAX+1];
+    int num_taxa = 0;
+    char node_names[MAX_NODES][INPUT_MAX + 1];
+    int num_all_nodes = 0;
+    int num_active_nodes = 0;
+    double distances[MAX_NODES][MAX_NODES];
+    int active_node_map[MAX_NODES];
+    
+    typedef struct node {
+    char *name;
+    struct node *neighbors[3];
+} NODE;
+
+    NODE nodes[MAX_NODES];
+    
+    
     // TO BE IMPLEMENTED
     //ignore comments starting with # (good)
     //fields are terminated by comma or new line  
@@ -93,6 +110,7 @@ int read_distance_data(FILE *in) {
     double *cols = *distances;
     double *rows = *distances;
     int zeroDecBool = 0;
+    
     
 
 while(c != '\0'){ //NULL termi means we reached the end of the file input
@@ -218,7 +236,12 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
                 
                 while(numCount != 0 ){
                 *clear -= '0'; //convert to a double using ascii
-                dubNum += (*clear * (pow(10, numCount - 1))); //multiply by 10 raised to numCount digits power
+                int tenPower = 1;
+                for(int i = 0; i < numCount - 1; i++){
+                    tenPower *= 10;
+                }
+                dubNum += (*clear * tenPower); //multiply by 10 raised to numCount digits power
+                //dubNum += (*clear * (pow(10, numCount - 1)));
                 numCount--;  //decrement numCount after each multiplication
                 clear++;
                 }
@@ -230,7 +253,13 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
                 
                     for(int i = -1; i >= decCount; i--){
                     *clear -= '0'; //convert to a double using ascii
-                    dubNum += (*clear * pow(10, i)); //multiply by 10 raised to decCount digits power
+                    int tenPower = 1;
+                    for(int j = 0; j < i; j++){
+                        tenPower *= 10;
+                    }
+                    
+                    dubNum += (*clear * tenPower);
+                   // dubNum += (*clear * pow(10, i)); //multiply by 10 raised to decCount digits power
                     clear++;
                     }
                 }
@@ -296,7 +325,13 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
                 
                 while(numCount != 0 ){
                 *clear -= '0'; //convert to a double using ascii
-                dubNum += (*clear * (pow(10, numCount - 1))); //multiply by 10 raised to numCount digits power
+                
+                int tenPower = 1;
+                for(int z = 0; z < numCount - 1; z++){
+                    tenPower *= 10;
+                }
+                dubNum += (*clear * tenPower);
+               // dubNum += (*clear * (pow(10, numCount - 1))); //multiply by 10 raised to numCount digits power
                 numCount--;  //decrement numCount after each multiplication
                 clear++;
                 }
@@ -308,7 +343,12 @@ while(c != '\0'){ //NULL termi means we reached the end of the file input
                 
                     for(int i = -1; i >= decCount; i--){
                     *clear -= '0'; //convert to a double using ascii
-                    dubNum += (*clear * pow(10, i)); //multiply by 10 raised to decCount digits power
+                    int tenPower = 1;
+                    for(int j = 0; j < i; j++){
+                        tenPower *= 10;
+                    }
+                    dubNum += (*clear * tenPower);
+                    //dubNum += (*clear * pow(10, i)); //multiply by 10 raised to decCount digits power
                     clear++;
                     }
                 }
@@ -393,7 +433,7 @@ char* namesPtr = *node_names;
 
 for(int i = 0; i < num_taxa; i++){
     nodePtr->name = namesPtr;
-    
+
     nodePtr++;
     namesPtr += INPUT_MAX + 1;
     
@@ -405,12 +445,11 @@ for(int i = 0; i < num_taxa; i++){
  
  for(int i = 0; i < num_taxa; i++){
      *activeNode = i;
-    
+     
      activeNode++;
      
  }
-    
-
+ 
     /* // FOR if
     c = fgetc(in);
     while(c != '\n'){
