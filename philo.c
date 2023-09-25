@@ -492,7 +492,77 @@ int emit_newick_format(FILE *out) {
      if(out == NULL){
         return -1; //error case
     }
-    
+   // the outlier name has to be error checked to see if it is a valid node name
+   //If there isn't a node name that matches the outlier name, then return -1;
+   
+   if(outlier_name != NULL){ //IF AN OUTLIER IS PROVIDED
+       char* outlierFrog = outlier_name;
+           char* nameFrog = *node_names;
+           int outlierBool = 0;
+           int frogBool = 0; // big outlier bool
+           
+           for(int i = 0; i < num_all_nodes; i++){
+               char* stringFrog = nameFrog;
+               outlierFrog = outlier_name; //reset outlier ptr to outlier_name
+               outlierBool = 0;
+               
+               while(*stringFrog != '\0'){
+                   if(*stringFrog != *outlierFrog){ //if node name doesnt match outlier
+                   outlierBool = 1;
+                       break;
+                   }
+                   stringFrog++;
+                   outlierFrog++;
+               }
+               
+               if(outlierBool == 0){ //this means that the outlier matches a nodename
+                   frogBool = 1; 
+               }
+               
+               nameFrog += INPUT_MAX + 1;
+           }
+            if(frogBool == 0){ // this means that outlier DID NOT match a nodename
+              return -1; //error case return error 
+           }
+    }
+    else{ //ELSE IF AN OUTLIER IS NOT PROVIDED THEN USE DEFAULT LEAF NODE WITH GREATEST DISTANCE sum
+        
+        //lets get the default leaf node
+        
+        int inFrog = 0;
+        int outFrog = 0;
+        double* frogPtr = *distances;
+        double* rowFrog = *distances;
+        double maxSum = 0;
+        int defaultLeaf = 0;
+        
+        while(outFrog < num_taxa){ //calculate the leaf node with ggreatest distance to other leaves
+            inFrog = 0;
+            double rowSum = 0;
+            
+            while(inFrog < num_taxa){
+                rowSum += *frogPtr;
+                
+                inFrog++;
+                frogPtr++;
+            }
+            
+            if(rowSum > maxSum){
+                maxSum = rowSum;
+                defaultLeaf = outFrog; //set the default leaf to the row 
+            }
+            
+            outFrog++;
+            frogPtr = *distances;
+            frogPtr += outFrog * MAX_NODES;
+            
+        }
+        
+        printf("%d\n", defaultLeaf);
+        
+        
+    }
+   
     return 0;
     abort();
 }
