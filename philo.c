@@ -863,7 +863,6 @@ int build_taxonomy(FILE *out) {
            
            taxaDist -= *matrixPtr2; //taxaDist - D(a,b) which is stored in matrixPtr2
            taxaDist /= 2.0;
-           
         
        
            //LETS PUT TAXADIST INTO DISTANCE MATRIX NOW 
@@ -881,14 +880,14 @@ int build_taxonomy(FILE *out) {
                 
                  while(printCount < 1){
                       //CHILD PARENT DISTANCE
-                     fprintf(out, "%d, %d, %0.2f\n", minRow, num_all_nodes, distA);
-                     fprintf(out, "%d, %d, %0.2f\n", minCol, num_all_nodes, distB);
+                     fprintf(fp2, "%d, %d, %0.2f\n", minRow, num_all_nodes, distA);
+                     fprintf(fp2, "%d, %d, %0.2f\n", minCol, num_all_nodes, distB);
                     
                      printCount++;
                  }
              }
               
-                matrixPtr3++; //RESET GO NEXT
+               *matrixPtr3++; //RESET GO NEXT
                 inner2++;
                 taxaDist = 0;
                 
@@ -900,7 +899,8 @@ int build_taxonomy(FILE *out) {
       
     }
     
-      
+    
+    //CHANGING THE MAPPING OF ACTIVE NODE MAP
     int* activePtr = active_node_map;
     int* activePtr2 = active_node_map;
 
@@ -939,7 +939,7 @@ int build_taxonomy(FILE *out) {
      double* lastChance = *distances;
      lastChance += *lastNodePtr * MAX_NODES;
      lastChance += num_all_nodes;
-     fprintf(out, "%d, %d, %0.2f\n", *lastNodePtr, num_all_nodes, *lastChance);
+     fprintf(fp2, "%d, %d, %0.2f\n", *lastNodePtr, num_all_nodes, *lastChance);
     }
     
     //PUT INTO NODE NAMES 
@@ -948,13 +948,13 @@ int build_taxonomy(FILE *out) {
     
     if(num_all_nodes > 99 && num_all_nodes < 1000){
         int thirdDigit = num_all_nodes / 100;  // 999 / 100 = 9 
-        char thirdChar = thirdDigit - '0';
+        char thirdChar = thirdDigit + '0';
         int secondDigit = num_all_nodes % 100; // 999 % 100 = 99
         secondDigit /= 10; // 99 / 10 = 9 
-        char secondChar = secondDigit - '0';
+        char secondChar = secondDigit + '0';
         int firstDigit = num_all_nodes % 100; // 999 % 100 == 99
         firstDigit = firstDigit % 10; //99 % 10 = 9
-        char firstChar = firstDigit - '0';
+        char firstChar = firstDigit + '0';
         
         newNames += num_all_nodes * (INPUT_MAX + 1);
         *bufferPtr = '#';
@@ -970,9 +970,9 @@ int build_taxonomy(FILE *out) {
     }
     else if(num_all_nodes > 9 && num_all_nodes < 99){
         int secondDigit = num_all_nodes / 10; // 99 / 10 = 9 
-        char secondChar = secondDigit - '0';
+        char secondChar = secondDigit + '0';
         int firstDigit = num_all_nodes % 10; // 99 % 10 = 9 
-        char firstChar = firstDigit - '0';
+        char firstChar = firstDigit + '0';
         
         newNames += num_all_nodes * (INPUT_MAX + 1);
         *bufferPtr = '#';
@@ -1013,8 +1013,40 @@ int build_taxonomy(FILE *out) {
        NODE* nodePtr = nodes;
        nodePtr += num_all_nodes;
        nodePtr->name = newNamer;
-      
        nodePtr++;
+       
+        //FOR NEIGHBORS Just go to when you create a new node U using a and b,
+    //go to U in the Nodes array and set its neighbor[1] = a and neighbor[2] = b
+    //then you go to A in Nodes and set its neighbor[0] = u
+    //then you go to B in Nodes and set its neighbor[0] = u
+    NODE* nodeyPtr = nodes;
+    nodeyPtr += num_all_nodes; //iterate to U in nodes
+    NODE** neighPtr = nodeyPtr->neighbors; 
+    
+    neighPtr++; //iterate to neighbor[1];
+    nodeyPtr = nodes;
+    nodeyPtr += minRow; //iterate to A in nodes
+    *neighPtr = nodeyPtr; //set it to A
+    
+    neighPtr++; //iterate to neighbor[2]
+    nodeyPtr = nodes;
+    nodeyPtr += minCol; //iterate to B in nodes
+    *neighPtr = nodeyPtr; //set it to B
+    
+    nodeyPtr = nodes;
+    nodeyPtr += minRow; //go to A in nodes 
+    neighPtr = nodeyPtr->neighbors;
+    nodeyPtr = nodes;
+    nodeyPtr += num_all_nodes; // iterate to U in nodes
+    *neighPtr = nodeyPtr; //set its neighbor[0] to u
+    
+    nodeyPtr = nodes;
+    nodeyPtr += minCol; //go to B in nodes
+    neighPtr = nodeyPtr->neighbors;
+    nodeyPtr = nodes;
+    nodeyPtr += num_all_nodes;
+    *neighPtr = nodeyPtr; //set its neighbor[0] to u
+
    
    //RESET STUFF
     num_all_nodes++;  
@@ -1045,8 +1077,7 @@ int build_taxonomy(FILE *out) {
 //for int i = 0 check for garbage in rows
 //for int j = 0  check for garbage in cols
 //if i or j is NOT inside active node map just continue b/c those represent deactivated nodes eg (a,b)
-    
-   
+  
     } //end of first if-statement
     
     if(num_taxa == 2){ //EDGE CASE 
@@ -1054,7 +1085,7 @@ int build_taxonomy(FILE *out) {
         double* edgeCasePtr = *distances;
         edgeCasePtr++;
         
-        fprintf(out, "%d, %d, %0.2f\n", 0, 1, *edgeCasePtr);
+        fprintf(fp2, "%d, %d, %0.2f\n", 0, 1, *edgeCasePtr);
       
     }
     
