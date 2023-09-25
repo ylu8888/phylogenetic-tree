@@ -529,7 +529,7 @@ int emit_distance_matrix(FILE *out) {
  * if any error occurred.
  */
 int build_taxonomy(FILE *out) {
-     // TO BE IMPLEMENTED
+    // TO BE IMPLEMENTED
     if(num_taxa > 2){
     
     int iterations = 1;
@@ -866,9 +866,6 @@ int build_taxonomy(FILE *out) {
                      printCount++;
                  }
              }
-             
-             
-              
               
                *matrixPtr3++; //RESET GO NEXT
                 inner2++;
@@ -923,12 +920,86 @@ int build_taxonomy(FILE *out) {
      lastChance += num_all_nodes;
      fprintf(fp2, "%d, %d, %0.2f\n", *lastNodePtr, num_all_nodes, *lastChance);
     }
+    
+    //PUT INTO NODE NAMES 
+    char* newNames = *node_names;
+    char* bufferPtr = input_buffer;
+    
+    if(num_all_nodes > 99 && num_all_nodes < 1000){
+        int thirdDigit = num_all_nodes / 100;  // 999 / 100 = 9 
+        char thirdChar = thirdDigit - '0';
+        int secondDigit = num_all_nodes % 100; // 999 % 100 = 99
+        secondDigit /= 10; // 99 / 10 = 9 
+        char secondChar = secondDigit - '0';
+        int firstDigit = num_all_nodes % 100; // 999 % 100 == 99
+        firstDigit = firstDigit % 10; //99 % 10 = 9
+        char firstChar = firstDigit - '0';
+        
+        newNames += num_all_nodes * (INPUT_MAX + 1);
+        *bufferPtr = '#';
+        bufferPtr++;
+        *bufferPtr = thirdChar;
+        bufferPtr++;
+        *bufferPtr = secondChar;
+        bufferPtr++;
+        *bufferPtr = firstChar;
+        bufferPtr++;
+        *bufferPtr = '\0';
+        
+    }
+    else if(num_all_nodes > 9 && num_all_nodes < 99){
+        int secondDigit = num_all_nodes / 10; // 99 / 10 = 9 
+        char secondChar = secondDigit - '0';
+        int firstDigit = num_all_nodes % 10; // 99 % 10 = 9 
+        char firstChar = firstDigit - '0';
+        
+        newNames += num_all_nodes * (INPUT_MAX + 1);
+        *bufferPtr = '#';
+        bufferPtr++;
+        *bufferPtr = secondChar;
+        bufferPtr++;
+        *bufferPtr = firstChar;
+        bufferPtr++;
+        *bufferPtr = '\0';
+        
+        
+    }
+    else{ //when num all nodes is single digit
+        newNames += num_all_nodes * (INPUT_MAX + 1);
+        *bufferPtr = '#';
+        bufferPtr++;
+        char exChar = num_all_nodes + '0';  //Converting int to char with ascii
+        *bufferPtr = exChar;
+        bufferPtr++;
+        *bufferPtr = '\0';
+      
+    }
+    
+    char *buffer2 = input_buffer; //PUTTING INPUTBUFFER INTO newNames
+        while(*buffer2 != '\0'){
+        *newNames = *buffer2;
+        newNames++;
+        *buffer2 = '\0';
+        buffer2++;
+        }
+       
+       *newNames = '\0';
+        newNames = *node_names;
+        
+       char* newNamer = *node_names;
+       newNamer += num_all_nodes * (INPUT_MAX + 1);
+       
+       NODE* nodePtr = nodes;
+       nodePtr += num_all_nodes;
+       nodePtr->name = newNamer;
+      
+       nodePtr++;
    
+   //RESET STUFF
     num_all_nodes++;  
     num_active_nodes--;
     iterations++;
     printCount = 0; //reset the fprintf to output
-    
     
   } // end of while loop
 
@@ -953,8 +1024,19 @@ int build_taxonomy(FILE *out) {
 //for int i = 0 check for garbage in rows
 //for int j = 0  check for garbage in cols
 //if i or j is NOT inside active node map just continue b/c those represent deactivated nodes eg (a,b)
-  
-    return 0;
+    
+   
     } //end of first if-statement
+    
+    if(num_taxa == 2){ //EDGE CASE 
+        //if only nodes are a and b, just print 0 and 1 for indices, and print the distance between those
+        double* edgeCasePtr = *distances;
+        edgeCasePtr++;
+        
+        fprintf(fp2, "%d, %d, %0.2f\n", 0, 1, *edgeCasePtr);
+      
+    }
+    
+    return 0;
     abort();
 }
