@@ -557,9 +557,18 @@ int emit_newick_format(FILE *out) {
             frogPtr += outFrog * MAX_NODES;
             
         }
+           
+        NODE *outToad = nodes; //this is the outlier node 
         
-        printf("%d\n", defaultLeaf);
         
+        for(int i = 0 ; i < defaultLeaf; i++){
+            outToad++;
+        }
+        
+        //find the outlier and find the root
+        NODE** root = outToad->neighbors;
+        
+        dfs(root, root, outToad, out);
         
     }
    
